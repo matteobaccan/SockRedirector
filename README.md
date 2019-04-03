@@ -30,8 +30,8 @@ Java sockRedirector is written in Java.
 Use this program in Linux, Windows, AIX, AS/400 or all environment you
 want.
 
-sockRedirector.ini
-------------------
+## sockRedirector.ini
+
 Ini file is divided in several <redirection> </redirection> section
 For each section you can define these parameters
 
@@ -43,8 +43,7 @@ For each section you can define these parameters
 
 <destinationport> destination port
 
-Only for expert
----------------
+## Only for expert
 
 <log> true/false (default), if you want to log data
 
@@ -62,8 +61,7 @@ Only for expert
     not available
 
 
-Update:
--------
+## Update
 
 1.00
 ----
