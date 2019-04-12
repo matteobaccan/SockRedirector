@@ -1,5 +1,6 @@
 # SockRedirector
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/160f180c1ada41eb98bf442552898873)](https://app.codacy.com/app/matteobaccan/SockRedirector?utm_source=github.com&utm_medium=referral&utm_content=matteobaccan/SockRedirector&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/matteobaccan/SockRedirector.svg?branch=master)](https://travis-ci.org/matteobaccan/SockRedirector)
 [![security status](https://www.meterian.io/badge/gh/matteobaccan/SockRedirector/security)](https://www.meterian.io/report/gh/matteobaccan/SockRedirector)
 [![stability status](https://www.meterian.io/badge/gh/matteobaccan/SockRedirector/stability)](https://www.meterian.io/report/gh/matteobaccan/SockRedirector)
