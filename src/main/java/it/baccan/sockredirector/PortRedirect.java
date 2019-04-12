@@ -79,7 +79,7 @@ public class PortRedirect extends Thread {
         // Se non ho la directory di LOG la creo
         if (logger) {
             try {
-                java.io.File oFile = new java.io.File("log");
+                File oFile = new File("log");
                 if (!oFile.exists()) {
                     oFile.mkdir();
                 }
@@ -90,7 +90,7 @@ public class PortRedirect extends Thread {
 
         if (cache) {
             try {
-                java.io.File oFile = new java.io.File("cache");
+                File oFile = new File("cache");
                 if (!oFile.exists()) {
                     oFile.mkdir();
                 }
@@ -140,9 +140,7 @@ public class PortRedirect extends Thread {
                     socket.setSoTimeout(timeout * 1000);
                 }
 
-                thread = new SockThread(this,
-                        socket,
-                        timeout,
+                thread = new SockThread(socket,
                         destinationAddress,
                         destinationPort,
                         logger,
@@ -174,16 +172,14 @@ public class PortRedirect extends Thread {
         private SubSockThread sourceOutputToDestinationInputThread;
         private SubSockThread destinationOutputToSourceInputThread;
 
-        public SockThread(PortRedirect server,
-                Socket socket,
-                long nTimeOut,
+        public SockThread(Socket socket,
                 String cOutServer,
                 int nPortTo,
                 boolean bLog,
                 boolean bCache,
                 boolean bOnlyCache,
                 int nSize) {
-            this.socket = socket;            
+            this.socket = socket;
             this.cOutServer = cOutServer;
             this.nPortTo = nPortTo;
             this.logData = bLog;
@@ -226,7 +222,7 @@ public class PortRedirect extends Thread {
                 if (cacheData) {
                     try {
                         cCacheDir = "cache" + File.separatorChar + cOutServer + "." + nPortTo;
-                        java.io.File oFile = new java.io.File(cCacheDir);
+                        File oFile = new File(cCacheDir);
                         if (!oFile.exists()) {
                             oFile.mkdir();
                         }
@@ -476,7 +472,7 @@ public class PortRedirect extends Thread {
                                     // Provo ad usare la cache
                                     boolean bUseCache = false;
                                     try {
-                                        java.io.File oFile = new java.io.File(cCrc);
+                                        File oFile = new File(cCrc);
                                         if (oFile.exists()) {
 
                                             byte[] bufferSO;
