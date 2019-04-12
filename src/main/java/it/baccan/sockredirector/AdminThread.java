@@ -34,13 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class AdminThread extends Thread {
-
-    /**
-     * Thread amministrativo di gestione processi.
-     */
-    public AdminThread() {
-    }
-
+    
     @Override
     public final void run() {
         try {

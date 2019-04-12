@@ -171,6 +171,8 @@ public class PortRedirect extends Thread {
         private final boolean cacheData;
         private final boolean onlyCache;
         private final int nSize;
+        private SubSockThread sourceOutputToDestinationInputThread;
+        private SubSockThread destinationOutputToSourceInputThread;
 
         public SockThread(PortRedirect server,
                 Socket socket,
@@ -192,9 +194,6 @@ public class PortRedirect extends Thread {
             threadNumber = THREADTOTAL.incrementAndGet();
             setName(threadNumber + "|" + sourcePort);
         }
-
-        private SubSockThread sourceOutputToDestinationInputThread;
-        private SubSockThread destinationOutputToSourceInputThread;
 
         public synchronized void killProcess() {
             try {

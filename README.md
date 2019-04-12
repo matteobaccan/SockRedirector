@@ -51,13 +51,12 @@ For each section you can define these parameters
 
 <onlycache> true/false (default) use only data in cache. May be usefull after a navigation in cache mode, for simulate a remote host that is not available
 
-
 ## Update
 
-1.00
+###1.00
 ----
 First public release
 
-2.00
+###2.00
 ----
 Some optimization and a new build
