@@ -53,10 +53,10 @@ For each section you can define these parameters
 
 ## Update
 
-###1.00
+### 1.00
 ----
 First public release
 
-###2.00
+### 2.00
 ----
 Some optimization and a new build
