@@ -2,6 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fce631c07eac48b682d8da9aee4b5301)](https://www.codacy.com/app/matteobaccan/SockRedirector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matteobaccan/SockRedirector&amp;utm_campaign=Badge_Grade)
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/matteobaccan/SockRedirector.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/matteobaccan/SockRedirector/context:java)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/matteobaccan/SockRedirector.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/matteobaccan/SockRedirector/alerts/)
 [![Build Status](https://travis-ci.org/matteobaccan/SockRedirector.svg?branch=master)](https://travis-ci.org/matteobaccan/SockRedirector)
 [![security status](https://www.meterian.io/badge/gh/matteobaccan/SockRedirector/security)](https://www.meterian.io/report/gh/matteobaccan/SockRedirector)
 [![stability status](https://www.meterian.io/badge/gh/matteobaccan/SockRedirector/stability)](https://www.meterian.io/report/gh/matteobaccan/SockRedirector)
