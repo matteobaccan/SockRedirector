@@ -55,7 +55,10 @@
                 <version>3.8.0</version>
                 <configuration>
                     <showDeprecation>true</showDeprecation>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>                    
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>     
+                    <excludes>
+                        <exclude>${project.basedir}/src/main/delombok/*.java</exclude>
+                    </excludes>               
                 </configuration>
             </plugin>
             <plugin>
@@ -163,7 +166,8 @@
                             <goal>delombok</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory> ${project.basedir}/src/main/java</sourceDirectory>
+                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                            <outputDirectory>${project.basedir}/src/main/delombok</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
