@@ -1,5 +1,5 @@
 extraction:
   java:
     index:
-      maven:
-         version: 3.5.2
+      build_command: mvn -Dfile.encoding=UTF-8 clean install
+
