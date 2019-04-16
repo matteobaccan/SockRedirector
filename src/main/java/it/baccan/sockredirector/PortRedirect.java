@@ -186,7 +186,7 @@ public class PortRedirect extends Thread {
             } catch (ThreadDeath td) {
                 log.error("ThreadDeath on killProcess [{}]", td.getMessage());
             } catch (Throwable e) {
-                log.error("Throwable", e.getMessage());
+                log.error("Throwable", e);
             }
 
             try {
@@ -194,10 +194,11 @@ public class PortRedirect extends Thread {
             } catch (ThreadDeath td) {
                 log.error("ThreadDeath on killProcess [{}]", td.getMessage());
             } catch (Throwable e) {
-                log.error("Throwable", e.getMessage());
+                log.error("Throwable", e);
             }
         }
 
+        @Override
         public void run() {
             if (logData) {
                 log.info("[{}] new user [{}]", threadNumber, socket);
