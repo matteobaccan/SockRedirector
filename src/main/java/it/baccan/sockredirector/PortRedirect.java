@@ -11,6 +11,7 @@
  */
 package it.baccan.sockredirector;
 
+import it.baccan.sockredirector.pojo.ServerPojo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -21,6 +22,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,180 +31,91 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class PortRedirect extends Thread {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PortRedirect.class);
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(PortRedirect.class);
 
     /**
      *
      */
     private static final AtomicLong THREADTOTAL = new AtomicLong(0);
-    private String sourceAddress;
-    private int sourcePort;
-    private String destinationAddress;
-    private int destinationPort;
-    private boolean logger;
-    private boolean cache;
-    private boolean onlycache;
-    private int timeout;
-    private int maxclient;
-    private int blockSize;
+
+    private ServerPojo serverPojo;
 
     /**
      *
-     * @param cXML
+     * @param server
      */
-    public PortRedirect(String cXML) {
-
-        this.sourceAddress = getToken(cXML, "source");
-        this.sourcePort = Integer.parseInt(getToken(cXML, "sourceport"));
-        this.destinationAddress = getToken(cXML, "destination");
-        this.destinationPort = Integer.parseInt(getToken(cXML, "destinationport"));
-        this.logger = getToken(cXML, "log", "false").equalsIgnoreCase("true");
-        this.cache = getToken(cXML, "cache", "false").equalsIgnoreCase("true");
-        this.onlycache = getToken(cXML, "onlycache", "false").equalsIgnoreCase("true");
-
-        // Se uno notes deve essere messo a 0
-        this.timeout = Integer.parseInt(getToken(cXML, "timeout", "0"));
-        this.maxclient = Integer.parseInt(getToken(cXML, "client", "10"));
-
-        this.blockSize = Integer.parseInt(getToken(cXML, "blocksize", "64000"));
-
-        // Se non ho la directory di LOG la creo
-        if (logger) {
-            try {
-                File oFile = new File("log");
-                if (!oFile.exists()) {
-                    oFile.mkdir();
-                }
-            } catch (Throwable e) {
-                log.error("Error creating log directory", e);
-            }
-        }
-
-        if (cache) {
-            try {
-                File oFile = new File("cache");
-                if (!oFile.exists()) {
-                    oFile.mkdir();
-                }
-            } catch (Throwable e) {
-                log.error("Error creating cache directory", e);
-            }
-        }
-
-        log.info("Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]" + (cache ? " CACHE" : "") + (onlycache ? " ONLYCACHE" : ""), sourceAddress, sourcePort, destinationAddress, destinationPort, timeout);
-
-    }
-
-    private String getToken(String cXML, String cToken) {
-        return getToken(cXML, cToken, "");
-    }
-
-    private String getToken(String cXML, String cToken, String cDefault) {
-        String cRet = "";
-
-        String cIni = "<" + cToken + ">";
-        String cEnd = "</" + cToken + ">";
-        int nPosIni = cXML.indexOf(cIni);
-        int nPosEnd = cXML.indexOf(cEnd);
-
-        if (nPosEnd > nPosIni) {
-            cRet = cXML.substring(nPosIni + cIni.length(), nPosEnd);
-        }
-
-        if (cRet.length() == 0) {
-            cRet = cDefault;
-        }
-
-        return cRet;
+    public PortRedirect(ServerPojo server) {
+        serverPojo = server;
+        LOG.info("Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]" + (serverPojo.isCache() ? " CACHE" : "") + (serverPojo.isOnlycache() ? " ONLYCACHE" : ""), serverPojo.getSourceAddress(), serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort(), serverPojo.getTimeout());
     }
 
     @Override
     public final void run() {
         Thread thread;
         try {                                  // port, maxrequest, address
-            ServerSocket sock = new ServerSocket(sourcePort, maxclient, InetAddress.getByName(sourceAddress));
+            ServerSocket sock = new ServerSocket(serverPojo.getSourcePort(), serverPojo.getMaxclient(), InetAddress.getByName(serverPojo.getSourceAddress()));
             while (true) {
                 // Faccio partire il Thread
                 Socket socket = sock.accept();
 
-                // Metto anche il timeout ai socket
-                if (timeout > 0) {
-                    socket.setSoTimeout(timeout * 1000);
+                // Metto anche il serverPojo.getTimeout() ai socket
+                if (serverPojo.getTimeout() > 0) {
+                    socket.setSoTimeout(serverPojo.getTimeout() * 1000);
                 }
 
-                thread = new SockThread(socket,
-                        destinationAddress,
-                        destinationPort,
-                        logger,
-                        cache,
-                        onlycache,
-                        blockSize);
+                thread = new SockThread(socket, serverPojo);
 
                 thread.start();
             }
         } catch (BindException bind) {
-            log.error("Address [{}:{}] already in use", sourceAddress, sourcePort);
+            LOG.error("Address [{}:{}] already in use", serverPojo.getSourceAddress(), serverPojo.getSourcePort());
         } catch (Throwable e) {
-            log.error("Error in redirector from [{}] \t to [{}:{}]", sourcePort, destinationAddress, destinationPort);
-            log.error("Full error", e);
+            LOG.error("Error in redirector from [{}] \t to [{}:{}]", serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort());
+            LOG.error("Full error", e);
         }
     }
 
     class SockThread extends Thread {
 
         private long threadNumber = 0;
-
+        private final ServerPojo serverPojo;
         private final Socket socket;
-        private final String cOutServer;
-        private final int nPortTo;
-        private final boolean logData;
-        private final boolean cacheData;
-        private final boolean onlyCache;
-        private final int nSize;
         private SubSockThread sourceOutputToDestinationInputThread;
         private SubSockThread destinationOutputToSourceInputThread;
 
-        public SockThread(Socket socket,
-                String cOutServer,
-                int nPortTo,
-                boolean bLog,
-                boolean bCache,
-                boolean bOnlyCache,
-                int nSize) {
+        public SockThread(Socket socket, ServerPojo server) {
             this.socket = socket;
-            this.cOutServer = cOutServer;
-            this.nPortTo = nPortTo;
-            this.logData = bLog;
-            this.cacheData = bCache;
-            this.onlyCache = bOnlyCache;
-            this.nSize = nSize;
+            serverPojo = server;
 
             threadNumber = THREADTOTAL.incrementAndGet();
-            setName(threadNumber + "|" + sourcePort);
+            setName(threadNumber + "|" + serverPojo.getSourcePort());
         }
 
         public synchronized void killProcess() {
             try {
                 sourceOutputToDestinationInputThread.stop();
             } catch (ThreadDeath td) {
-                log.error("ThreadDeath on killProcess [{}]", td.getMessage());
+                LOG.error("ThreadDeath on killProcess [{}]", td.getMessage());
             } catch (Throwable e) {
-                log.error("Throwable", e);
+                LOG.error("Throwable", e);
             }
 
             try {
                 destinationOutputToSourceInputThread.stop();
             } catch (ThreadDeath td) {
-                log.error("ThreadDeath on killProcess [{}]", td.getMessage());
+                LOG.error("ThreadDeath on killProcess [{}]", td.getMessage());
             } catch (Throwable e) {
-                log.error("Throwable", e);
+                LOG.error("Throwable", e);
             }
         }
 
         @Override
         public void run() {
-            if (logData) {
-                log.info("[{}] new user [{}]", threadNumber, socket);
+            if (serverPojo.isLogger()) {
+                LOG.info("[{}] new user [{}]", threadNumber, socket);
             }
 
             Socket socketOut = null;
@@ -209,9 +123,9 @@ public class PortRedirect extends Thread {
             try {
 
                 String cCacheDir = "";
-                if (cacheData) {
+                if (serverPojo.isCache()) {
                     try {
-                        cCacheDir = "cache" + File.separatorChar + cOutServer + "." + nPortTo;
+                        cCacheDir = "cache" + File.separatorChar + serverPojo.getDestinationAddress() + "." + serverPojo.getDestinationPort();
                         File oFile = new File(cCacheDir);
                         if (!oFile.exists()) {
                             oFile.mkdir();
@@ -225,8 +139,8 @@ public class PortRedirect extends Thread {
 
                 InputStream destinationInputStream = null;
                 PrintStream destinationOutputStream = null;
-                if (!onlyCache) {
-                    socketOut = new Socket(cOutServer, nPortTo);
+                if (!serverPojo.isOnlycache()) {
+                    socketOut = new Socket(serverPojo.getDestinationAddress(), serverPojo.getDestinationPort());
                     destinationInputStream = socketOut.getInputStream();
                     destinationOutputStream = new PrintStream(socketOut.getOutputStream());
                 }
@@ -237,25 +151,25 @@ public class PortRedirect extends Thread {
                         destinationInputStream,
                         destinationOutputStream,
                         sourceInputStream,
-                        cOutServer + "-" + nPortTo + ".in" + threadNumber,
-                        logData,
-                        cacheData,
+                        serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".in" + threadNumber,
+                        serverPojo.isLogger(),
+                        serverPojo.isCache(),
                         cCacheDir,
-                        nSize);
+                        serverPojo.getBlockSize());
                 sourceOutputToDestinationInputThread.start();
 
-                if (!cacheData) {
+                if (!serverPojo.isCache()) {
                     // D -> S
                     destinationOutputToSourceInputThread = new SubSockThread(this,
                             destinationOutputStream,
                             sourceInputStream,
                             sourceOutputStream,
                             destinationInputStream,
-                            cOutServer + "-" + nPortTo + ".out" + threadNumber,
-                            logData,
-                            cacheData,
+                            serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".out" + threadNumber,
+                            serverPojo.isLogger(),
+                            serverPojo.isCache(),
                             cCacheDir,
-                            nSize);
+                            serverPojo.getBlockSize());
                     destinationOutputToSourceInputThread.start();
 
                     while (destinationOutputToSourceInputThread.isAlive() && sourceOutputToDestinationInputThread.isAlive()) {
@@ -268,27 +182,26 @@ public class PortRedirect extends Thread {
                 }
 
             } catch (Throwable e) {
-                log.error("[{}] host:port [{}:{}]", threadNumber, cOutServer, nPortTo);
-                log.error("Unknow error", e);
-            }
-
-            try {
-                socket.close();
-            } catch (Throwable e) {
-                log.error("Error on socket.close", e);
-            }
-
-            try {
-                // Se e' only cache non ho la socket out
-                if (socketOut != null) {
-                    socketOut.close();
+                LOG.error("[{}] host:port [{}:{}]", threadNumber, serverPojo.getDestinationAddress(), serverPojo.getDestinationPort());
+                LOG.error("Unknow error", e);
+            } finally {
+                try {
+                    socket.close();
+                } catch (Throwable e) {
+                    LOG.error("Error on socket.close", e);
                 }
-            } catch (Throwable e) {
-                log.error("Error on socketOut.close", e);
+                try {
+                    // Se e' only cache non ho la socket out
+                    if (socketOut != null) {
+                        socketOut.close();
+                    }
+                } catch (Throwable e) {
+                    LOG.error("Error on socketOut.close", e);
+                }
             }
 
-            if (logData) {
-                log.info("[{}] disconnect", threadNumber);
+            if (serverPojo.isLogger()) {
+                LOG.info("[{}] disconnect", threadNumber);
             }
 
         }
@@ -398,7 +311,7 @@ public class PortRedirect extends Thread {
                             break;
 
                         } catch (Throwable e) {
-                            log.error("Error on runNormal", e);
+                            LOG.error("Error on runNormal", e);
                             break;
                         }
                     }
@@ -408,9 +321,9 @@ public class PortRedirect extends Thread {
                     }
 
                 } catch (ThreadDeath td) {
-                    log.error("ThreadDeath on runNormal [{}]", td.getMessage());
+                    LOG.error("ThreadDeath on runNormal [{}]", td.getMessage());
                 } catch (Throwable e) {
-                    log.error("Error on runNormal file", e);
+                    LOG.error("Error on runNormal file", e);
                 }
             }
 
@@ -541,7 +454,7 @@ public class PortRedirect extends Thread {
                     }
 
                 } catch (Throwable e) {
-                    log.error("Error on runCache", e);
+                    LOG.error("Error on runCache", e);
                 }
 
             }

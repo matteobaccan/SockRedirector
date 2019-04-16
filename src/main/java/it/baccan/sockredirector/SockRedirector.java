@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 Matteo Baccan
  * http://www.baccan.it
- * 
+ *
  * Distributed under the GPL v3 software license, see the accompanying
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
@@ -11,8 +11,13 @@
  */
 package it.baccan.sockredirector;
 
+import it.baccan.sockredirector.pojo.ServerPojo;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -20,24 +25,51 @@ import java.io.InputStream;
  */
 public class SockRedirector extends Thread {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SockRedirector.class);
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SockRedirector.class);
 
     /**
      *
-     * @param argv
+     * @param argv Command line parameters.
      */
-    static public void main(String[] argv) {
+    public static void main(final String[] argv) {
+        SockRedirector sockRedirector = new SockRedirector();
+        sockRedirector.init();
+    }
 
+    public void init() {
         final String initFile = "sockRedirector.ini";
 
-        log.info("+---------------------------------------------------------------------------+");
-        log.info("| TCP/IP Port Redirector                                                    |");
-        log.info("| Matteo Baccan Opensource Software                    http://www.baccan.it |");
-        log.info("+---------------------------------------------------------------------------+");
-        log.info("");
-        log.info("Opening {} ...", initFile);
+        LOG.info("+---------------------------------------------------------------------------+");
+        LOG.info("| TCP/IP Port Redirector                                                    |");
+        LOG.info("| Matteo Baccan Opensource Software                    http://www.baccan.it |");
+        LOG.info("+---------------------------------------------------------------------------+");
+        LOG.info("");
+        
+        LOG.info("Setup environment");
+        // Se non ho la directory di LOG la creo
         try {
+            File oFile = new File("log");
+            if (!oFile.exists()) {
+                oFile.mkdir();
+            }
+        } catch (Throwable e) {
+            LOG.error("Error creating log directory", e);
+        }
 
+        try {
+            File oFile = new File("cache");
+            if (!oFile.exists()) {
+                oFile.mkdir();
+            }
+        } catch (Throwable e) {
+            LOG.error("Error creating cache directory", e);
+        }
+
+        LOG.info("Opening [{}] ...", initFile);
+        try {
             byte[] buffer;
             // Leggo il file di specifiche
             try (InputStream fInput = new FileInputStream(initFile)) {
@@ -56,9 +88,24 @@ public class SockRedirector extends Thread {
             // Create admin process
             AdminThread admin = new AdminThread();
             while (nPosEnd > nPosIni) {
-                String cRed = cFileReaded.substring(nPosIni, nPosEnd + cEnd.length());
+                String cXML = cFileReaded.substring(nPosIni, nPosEnd + cEnd.length());
 
-                PortRedirect server = new PortRedirect(cRed);
+                ServerPojo serverPojo = new ServerPojo();
+                serverPojo.setSourceAddress(getToken(cXML, "source"));
+                serverPojo.setSourcePort(Integer.parseInt(getToken(cXML, "sourceport")));
+                serverPojo.setDestinationAddress(getToken(cXML, "destination"));
+                serverPojo.setDestinationPort(Integer.parseInt(getToken(cXML, "destinationport")));
+                serverPojo.setLogger(getToken(cXML, "log", "false").equalsIgnoreCase("true"));
+                serverPojo.setCache(getToken(cXML, "cache", "false").equalsIgnoreCase("true"));
+                serverPojo.setOnlycache(getToken(cXML, "onlycache", "false").equalsIgnoreCase("true"));
+
+                // Se uno notes deve essere messo a 0
+                serverPojo.setTimeout(Integer.parseInt(getToken(cXML, "timeout", "0")));
+                serverPojo.setMaxclient(Integer.parseInt(getToken(cXML, "client", "10")));
+
+                serverPojo.setBlockSize(Integer.parseInt(getToken(cXML, "blocksize", "64000")));
+
+                PortRedirect server = new PortRedirect(serverPojo);
                 server.start();
 
                 // Cerco il blocco successivo
@@ -69,11 +116,34 @@ public class SockRedirector extends Thread {
             // Start admin
             admin.start();
 
-            log.info("");
-            log.info("All system ready. Type \"help\" for debug info");
+            LOG.info("");
+            LOG.info("All system ready. Type \"help\" for debug info");
 
-        } catch (Exception e) {
-            log.error("Error during opening of " + initFile, e);
+        } catch (IOException e) {
+            LOG.error("Error during opening of " + initFile, e);
         }
+    }
+
+    private String getToken(String cXML, String cToken) {
+        return getToken(cXML, cToken, "");
+    }
+
+    private String getToken(String cXML, String cToken, String cDefault) {
+        String cRet = "";
+
+        String cIni = "<" + cToken + ">";
+        String cEnd = "</" + cToken + ">";
+        int nPosIni = cXML.indexOf(cIni);
+        int nPosEnd = cXML.indexOf(cEnd);
+
+        if (nPosEnd > nPosIni) {
+            cRet = cXML.substring(nPosIni + cIni.length(), nPosEnd);
+        }
+
+        if (cRet.length() == 0) {
+            cRet = cDefault;
+        }
+
+        return cRet;
     }
 }
