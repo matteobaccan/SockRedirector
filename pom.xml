@@ -56,9 +56,6 @@
                 <configuration>
                     <showDeprecation>true</showDeprecation>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>     
-                    <excludes>
-                        <exclude>${project.basedir}/src/main/delombok/*.java</exclude>
-                    </excludes>               
                 </configuration>
             </plugin>
             <plugin>
@@ -154,7 +151,7 @@
                     </execution>
                 </executions>
             </plugin>
-                        
+            <!--
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
@@ -166,12 +163,12 @@
                             <goal>delombok</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-                            <outputDirectory>${project.basedir}/src/main/delombok</outputDirectory>
+                            <sourceDirectory> ${project.basedir}/src/main/java</sourceDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
 
     </build>

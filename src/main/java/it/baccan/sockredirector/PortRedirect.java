@@ -21,14 +21,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicLong;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Matteo Baccan <matteo@baccan.it>
  */
-@Slf4j
 public class PortRedirect extends Thread {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PortRedirect.class);
 
     /**
      *

@@ -6,14 +6,13 @@
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
  */
-/*
+ /*
  * Debug Thread
  */
 package it.baccan.sockredirector;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Classe generica di amministrazione del thread
@@ -21,8 +20,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author Matteo Baccan <matteo@baccan.it>
  * @version 1.0
  */
-@Slf4j
 public class AdminThread extends Thread {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminThread.class);
 
     @Override
     public final void run() {

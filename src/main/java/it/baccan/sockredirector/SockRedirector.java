@@ -6,21 +6,21 @@
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
  */
-/*
+ /*
  * socketRedirector server
  */
 package it.baccan.sockredirector;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Matteo Baccan <matteo@baccan.it>
  */
-@Slf4j
 public class SockRedirector extends Thread {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SockRedirector.class);
 
     /**
      *
