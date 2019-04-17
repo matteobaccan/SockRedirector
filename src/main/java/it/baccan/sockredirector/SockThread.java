@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
-import static java.lang.Thread.sleep;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;

@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Classe generica di amministrazione del thread
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AdminThread extends Thread {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminThread.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminThread.class);
 
     @Override
     public final void run() {
