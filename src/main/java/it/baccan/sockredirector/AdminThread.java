@@ -13,6 +13,8 @@ package it.baccan.sockredirector;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Classe generica di amministrazione del thread
@@ -34,7 +36,7 @@ public class AdminThread extends Thread {
                 cLine = cLine.trim();
 
                 int nSpace = cLine.indexOf(' ');
-                String cCommand = "";
+                String cCommand;
                 String cParam = "";
 
                 if (nSpace != -1) {
@@ -65,7 +67,6 @@ public class AdminThread extends Thread {
                     }
                     log.info("");
                 }
-
             }
         } catch (Throwable e) {
             log.error("adminThread error", e);
@@ -73,51 +74,26 @@ public class AdminThread extends Thread {
     }
 
     private void dumpThread(String filter) {
-        // Risalgo al primo parent
-        ThreadGroup group = Thread.currentThread().getThreadGroup();
-        while (group.getParent() != null) {
-            group = group.getParent();
-        }
-
-        Thread[] threads = new Thread[group.activeCount()];
-
-        int threadCount = Math.min(group.enumerate(threads, true), threads.length);
-
-        for (int i = 0; i < threadCount; i++) {
-            String info = getThreadInfo(threads[i]);
-            //int hashCode = System.identityHashCode(threads[i]);
-            //log.info('[' + Integer.toHexString(hashCode) + "] " + info);
-            if (filter.isEmpty()) {
-                log.info(info);
-            } else if (info.contains(filter)) {
+        // Ask all threads to JVM
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        threadSet.forEach((Thread thread) -> {
+            String info = getThreadInfo(thread);
+            if (filter.isEmpty() || info.contains(filter)) {
                 log.info(info);
             }
-        }
-
+        });
     }
 
     private void kill(final String cThread) {
-        // Risalgo al primo parent
-        ThreadGroup group = Thread.currentThread().getThreadGroup();
-        while (group.getParent() != null) {
-            group = group.getParent();
-        }
-
-        Thread[] threads = new Thread[group.activeCount()];
-
-        int threadCount = Math.min(group.enumerate(threads, true), threads.length);
-
-        boolean bKill = false;
-        for (int i = 0; i < threadCount; i++) {
-            //String info = getThreadInfo(threads[i]);
-            //int hashCode = System.identityHashCode(threads[i]);
-            //String cTH = Integer.toHexString(hashCode);
+        // Ask all threads to JVM
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        AtomicBoolean bKill = new AtomicBoolean(false);
+        threadSet.forEach((Thread thread) -> {
             try {
-                if (cThread.equals("" + threads[i].getId())) {
-                    bKill = true;
-
-                    log.info("Try to kill " + cThread);
-                    threads[i].stop();
+                if (cThread.equals("" + thread.getId())) {
+                    bKill.set(true);
+                    log.info("Try to kill ID[{}]", cThread);
+                    thread.interrupt();
                     log.info("Thread killed");
                 }
             } catch (ThreadDeath td) {
@@ -125,9 +101,9 @@ public class AdminThread extends Thread {
             } catch (Exception exception) {
                 log.error("Exception on admin kill", exception);
             }
-        }
+        });
 
-        if (!bKill) {
+        if (!bKill.get()) {
             log.info("Thread not found");
         }
 
@@ -136,20 +112,23 @@ public class AdminThread extends Thread {
     private String getThreadInfo(final Thread thread) {
         StringBuilder sb = new StringBuilder(128);
         try {
-            sb.append("[").append(thread.getId()).append("]");
-            sb.append("[").append(thread.getState()).append("]");
-            sb.append(thread);
+            sb.append(" ID[").append(thread.getId()).append("]");
+            sb.append(" ").append(thread.getName());
+            sb.append(" STATE[").append(thread.getState()).append("]");
+            sb.append(" PRIORITY[").append(thread.getPriority()).append("]");
+            ThreadGroup threadGroup = thread.getThreadGroup();
+            if (threadGroup != null) {
+                sb.append(" GROUP[").append(threadGroup.getName()).append("]");
+            }
             if (thread.isDaemon()) {
-                sb.append(", daemon");
+                sb.append(" [daemon]");
             }
             if (thread.isAlive()) {
-                sb.append(", alive");
+                sb.append(" [alive]");
             }
             if (thread.isInterrupted()) {
-                sb.append(", interrupted");
+                sb.append(" [interrupted]");
             }
-            sb.append(", priority = ").append(thread.getPriority());
-            sb.append(", name = ").append(thread.getName());
         } catch (Exception exception) {
             log.error("getThreadInfo error", exception);
         }
