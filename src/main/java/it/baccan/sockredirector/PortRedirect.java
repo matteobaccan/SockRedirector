@@ -12,6 +12,7 @@
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
+import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -30,13 +31,15 @@ public class PortRedirect extends Thread {
      */
     private static final Logger LOG = LoggerFactory.getLogger(PortRedirect.class);
 
-    private ServerPojo serverPojo;
+    private final ServerPojo serverPojo;
 
     /**
      *
      * @param server
      */
     public PortRedirect(ServerPojo server) {
+        super();
+        setName("PortRedirect");
         serverPojo = server;
         LOG.info("Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]" + (serverPojo.isCache() ? " CACHE" : "") + (serverPojo.isOnlycache() ? " ONLYCACHE" : ""), serverPojo.getSourceAddress(), serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort(), serverPojo.getTimeout());
     }
@@ -60,7 +63,7 @@ public class PortRedirect extends Thread {
             }
         } catch (BindException bind) {
             LOG.error("Address [{}:{}] already in use : [{}]", serverPojo.getSourceAddress(), serverPojo.getSourcePort(), bind.getMessage());
-        } catch (Throwable e) {
+        } catch (IOException e) {
             LOG.error("Error in redirector from [{}] \t to [{}:{}]", serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort());
             LOG.error("Full error", e);
         }

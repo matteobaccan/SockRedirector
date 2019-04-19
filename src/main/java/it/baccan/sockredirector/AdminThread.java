@@ -26,7 +26,12 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminThread extends Thread {
 
-    private static final Logger log = LoggerFactory.getLogger(AdminThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdminThread.class);
+
+    public AdminThread() {
+        super();
+        setName("AdminThread");
+    }
 
     @Override
     public final void run() {
@@ -35,6 +40,9 @@ public class AdminThread extends Thread {
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 String cLine = input.readLine();
+
+                LOG.info("Admin> [{}]", cLine);
+
                 cLine = cLine.trim();
 
                 int nSpace = cLine.indexOf(' ');
@@ -49,29 +57,29 @@ public class AdminThread extends Thread {
                 }
 
                 if (cCommand.equalsIgnoreCase("help")) {
-                    log.info("");
-                    log.info("help                      - this help");
-                    log.info("exit                      - exit program");
-                    log.info("thread [filter]           - thread list");
-                    log.info("kill <nth> [... [<nth>]]  - kill nth thread");
-                    log.info("");
+                    LOG.info("");
+                    LOG.info("help                      - this help");
+                    LOG.info("exit                      - exit program");
+                    LOG.info("thread [filter]           - thread list");
+                    LOG.info("kill <nth> [... [<nth>]]  - kill nth thread");
+                    LOG.info("");
                 } else if (cCommand.equalsIgnoreCase("exit")) {
                     System.exit(0);
                 } else if (cCommand.equalsIgnoreCase("thread")) {
-                    log.info("");
+                    LOG.info("");
                     dumpThread(cParam);
-                    log.info("");
+                    LOG.info("");
                 } else if (cCommand.equalsIgnoreCase("kill")) {
-                    log.info("");
+                    LOG.info("");
                     String[] th = cParam.split(" ");
                     for (String t : th) {
                         kill(t);
                     }
-                    log.info("");
+                    LOG.info("");
                 }
             }
         } catch (Throwable e) {
-            log.error("adminThread error", e);
+            LOG.error("adminThread error", e);
         }
     }
 
@@ -81,7 +89,9 @@ public class AdminThread extends Thread {
         threadSet.forEach((Thread thread) -> {
             String info = getThreadInfo(thread);
             if (filter.isEmpty() || info.contains(filter)) {
-                log.info(info);
+                if (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName())) {
+                    LOG.info(info);
+                }
             }
         });
     }
@@ -94,19 +104,19 @@ public class AdminThread extends Thread {
             try {
                 if (cThread.equals("" + thread.getId())) {
                     bKill.set(true);
-                    log.info("Try to kill ID[{}]", cThread);
+                    LOG.info("Try to kill ID[{}]", cThread);
                     thread.interrupt();
-                    log.info("Thread killed");
+                    LOG.info("Thread killed");
                 }
             } catch (ThreadDeath td) {
-                log.error("ThreadDeath on admin kill [{}]", td.getMessage());
+                LOG.error("ThreadDeath on admin kill [{}]", td.getMessage());
             } catch (Exception exception) {
-                log.error("Exception on admin kill", exception);
+                LOG.error("Exception on admin kill", exception);
             }
         });
 
         if (!bKill.get()) {
-            log.info("Thread not found");
+            LOG.info("Thread not found");
         }
 
     }
@@ -114,8 +124,7 @@ public class AdminThread extends Thread {
     private String getThreadInfo(final Thread thread) {
         StringBuilder sb = new StringBuilder(128);
         try {
-            sb.append(" ID[").append(thread.getId()).append("]");
-            sb.append(" ").append(thread.getName());
+            sb.append(" ID[").append(String.format("%1$5d", thread.getId())).append("]");
             sb.append(" STATE[").append(thread.getState()).append("]");
             sb.append(" PRIORITY[").append(thread.getPriority()).append("]");
             ThreadGroup threadGroup = thread.getThreadGroup();
@@ -131,8 +140,9 @@ public class AdminThread extends Thread {
             if (thread.isInterrupted()) {
                 sb.append(" [interrupted]");
             }
+            sb.append(" ").append(thread.getName());
         } catch (Exception exception) {
-            log.error("getThreadInfo error", exception);
+            LOG.error("getThreadInfo error", exception);
         }
         return sb.toString();
     }
