@@ -7,7 +7,7 @@
  *
  */
 package it.baccan.sockredirector.pojo;
- 
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,13 +17,12 @@ import lombok.Setter;
  */
 @Setter @Getter
 public class ServerPojo {
+
     private String sourceAddress;
     private int sourcePort;
     private String destinationAddress;
     private int destinationPort;
     private boolean logger;
-    private boolean cache;
-    private boolean onlycache;
     private int timeout;
     private int maxclient;
     private int blockSize;

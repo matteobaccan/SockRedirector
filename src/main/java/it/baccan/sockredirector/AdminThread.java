@@ -12,6 +12,7 @@
 package it.baccan.sockredirector;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +29,9 @@ public class AdminThread extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdminThread.class);
 
+    /**
+     * Admin thread constructor.
+     */
     public AdminThread() {
         super();
         setName("AdminThread");
@@ -39,21 +43,23 @@ public class AdminThread extends Thread {
 
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
-                String cLine = input.readLine();
+                String line = input.readLine();
 
-                LOG.info("Admin> [{}]", cLine);
+                if (!line.isEmpty()) {
+                    LOG.info("Admin> [{}]", line);
+                }
 
-                cLine = cLine.trim();
+                line = line.trim();
 
-                int nSpace = cLine.indexOf(' ');
+                int nSpace = line.indexOf(' ');
                 String cCommand;
                 String cParam = "";
 
                 if (nSpace != -1) {
-                    cCommand = cLine.substring(0, nSpace).trim();
-                    cParam = cLine.substring(nSpace).trim();
+                    cCommand = line.substring(0, nSpace).trim();
+                    cParam = line.substring(nSpace).trim();
                 } else {
-                    cCommand = cLine;
+                    cCommand = line;
                 }
 
                 if (cCommand.equalsIgnoreCase("help")) {
@@ -64,7 +70,7 @@ public class AdminThread extends Thread {
                     LOG.info("kill <nth> [... [<nth>]]  - kill nth thread");
                     LOG.info("");
                 } else if (cCommand.equalsIgnoreCase("exit")) {
-                    System.exit(0);
+                    Runtime.getRuntime().halt(0);
                 } else if (cCommand.equalsIgnoreCase("thread")) {
                     LOG.info("");
                     dumpThread(cParam);
@@ -78,7 +84,7 @@ public class AdminThread extends Thread {
                     LOG.info("");
                 }
             }
-        } catch (Throwable e) {
+        } catch (IOException e) {
             LOG.error("adminThread error", e);
         }
     }
@@ -88,10 +94,10 @@ public class AdminThread extends Thread {
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         threadSet.forEach((Thread thread) -> {
             String info = getThreadInfo(thread);
-            if (filter.isEmpty() || info.contains(filter)) {
-                if (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName())) {
-                    LOG.info(info);
-                }
+            // If is in filter and the tread is not System
+            if ((filter.isEmpty() || info.contains(filter)) 
+                    && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))) {
+                LOG.info(info);
             }
         });
     }

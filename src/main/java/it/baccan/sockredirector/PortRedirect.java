@@ -41,7 +41,7 @@ public class PortRedirect extends Thread {
         super();
         setName("PortRedirect");
         serverPojo = server;
-        LOG.info("Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]" + (serverPojo.isCache() ? " CACHE" : "") + (serverPojo.isOnlycache() ? " ONLYCACHE" : ""), serverPojo.getSourceAddress(), serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort(), serverPojo.getTimeout());
+        LOG.info("Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]", serverPojo.getSourceAddress(), serverPojo.getSourcePort(), serverPojo.getDestinationAddress(), serverPojo.getDestinationPort(), serverPojo.getTimeout());
     }
 
     @Override

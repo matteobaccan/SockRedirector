@@ -39,6 +39,9 @@ public class SockRedirector extends Thread {
         sockRedirector.init();
     }
 
+    /**
+     * Init program.
+     */
     public void init() {
         final String initFile = "sockRedirector.ini";
 
@@ -47,25 +50,16 @@ public class SockRedirector extends Thread {
         LOG.info("| Matteo Baccan Opensource Software                    http://www.baccan.it |");
         LOG.info("+---------------------------------------------------------------------------+");
         LOG.info("");
-        
+
         LOG.info("Setup environment");
         // Se non ho la directory di LOG la creo
         try {
-            File oFile = new File("log");
+            File oFile = new File("logs");
             if (!oFile.exists()) {
                 oFile.mkdir();
             }
         } catch (Throwable e) {
             LOG.error("Error creating log directory", e);
-        }
-
-        try {
-            File oFile = new File("cache");
-            if (!oFile.exists()) {
-                oFile.mkdir();
-            }
-        } catch (Throwable e) {
-            LOG.error("Error creating cache directory", e);
         }
 
         LOG.info("Opening [{}] ...", initFile);
@@ -96,8 +90,6 @@ public class SockRedirector extends Thread {
                 serverPojo.setDestinationAddress(getToken(cXML, "destination"));
                 serverPojo.setDestinationPort(Integer.parseInt(getToken(cXML, "destinationport")));
                 serverPojo.setLogger(getToken(cXML, "log", "false").equalsIgnoreCase("true"));
-                serverPojo.setCache(getToken(cXML, "cache", "false").equalsIgnoreCase("true"));
-                serverPojo.setOnlycache(getToken(cXML, "onlycache", "false").equalsIgnoreCase("true"));
 
                 // Se uno notes deve essere messo a 0
                 serverPojo.setTimeout(Integer.parseInt(getToken(cXML, "timeout", "0")));
