@@ -9,9 +9,11 @@
 package it.baccan.sockredirector;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.SocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,66 +71,72 @@ public class SubSockThread extends Thread {
     private void runNormal() {
         byte[] buffer = new byte[nSize];
 
+        RandomAccessFile logFile = null;
         try {
-            RandomAccessFile logFile = null;
             if (outputLog) {
                 logFile = new RandomAccessFile("logs" + File.separatorChar + outputFileLog, "rw");
             }
 
-            try {
-                // Va bene per tutti i protocolli ed e' abbastanza performante
-                int nPos = 0;
-                int nToRead = -1;
-                int c;
-                while (true) {
-                    // Leggo un singolo byte
-                    try {
-                        c = sourceInputStream.read();
-                        if (c == -1) {
-                            break;
-                        }
-                    } catch (Throwable e) {
+            // Va bene per tutti i protocolli ed e' abbastanza performante
+            int nPos = 0;
+            int nToRead = -1;
+            int c;
+            while (true) {
+                // Leggo un singolo byte
+                try {
+                    c = sourceInputStream.read();
+                    if (c == -1) {
                         break;
                     }
-
-                    // Accodo il byte
-                    buffer[nPos++] = (byte) c;
-
-                    if (nToRead <= 0) {
-                        nToRead = sourceInputStream.available();
+                } catch (SocketException se) {
+                    if ("Socket closed".equals(se.getMessage())) {
+                        // Chiusura della connessione
+                        LOG.info("[{}] Socket closed", parentSockThread.getThreadNumber());
+                    } else {
+                        LOG.error("[{}] SocketException [{}]", parentSockThread.getThreadNumber(), se.getMessage());
                     }
-
-                    // Se arrivo a blockSize o se poi non ho piu' byte
-                    // scrivo il buffer che ho in quel momento
-                    if (nPos >= nSize || nToRead == 0) {
-                        sourceOutputStream.write(buffer, 0, nPos);
-                        if (outputLog) {
-                            logFile.write(buffer, 0, nPos);
-                        }
-                        nPos = 0;
-                    }
-                    nToRead--;
-
+                    break;
+                } catch (Throwable e) {
+                    LOG.error("[{}] readError [{}]", parentSockThread.getThreadNumber(), e.getMessage());
+                    break;
                 }
 
-                // Scrivo l'avanzo
-                sourceOutputStream.write(buffer, 0, nPos);
-                if (outputLog) {
-                    logFile.write(buffer, 0, nPos);
+                // Accodo il byte
+                buffer[nPos++] = (byte) c;
+
+                if (nToRead <= 0) {
+                    nToRead = sourceInputStream.available();
                 }
-                nPos = 0;
-            } catch (Throwable e) {
-                LOG.error("Error on runNormal", e);
+
+                // Se arrivo a blockSize o se poi non ho piu' byte
+                // scrivo il buffer che ho in quel momento
+                if (nPos >= nSize || nToRead == 0) {
+                    sourceOutputStream.write(buffer, 0, nPos);
+                    if (logFile != null) {
+                        logFile.write(buffer, 0, nPos);
+                    }
+                    nPos = 0;
+                }
+                nToRead--;
             }
 
-            if (outputLog) {
-                logFile.close();
+            // Scrivo l'avanzo
+            sourceOutputStream.write(buffer, 0, nPos);
+            if (logFile != null) {
+                logFile.write(buffer, 0, nPos);
             }
-
         } catch (ThreadDeath td) {
-            LOG.error("ThreadDeath on runNormal [{}]", td.getMessage());
+            LOG.error("[{}] ThreadDeath on runNormal [{}]", parentSockThread.getThreadNumber(),td.getMessage());
         } catch (Throwable e) {
-            LOG.error("Error on runNormal file", e);
+            LOG.error("[{}] Error on runNormal [{}]", parentSockThread.getThreadNumber(),e.getMessage());
+        } finally {
+            if (logFile != null) {
+                try {
+                    logFile.close();
+                } catch (IOException iOException) {
+                    LOG.error("[{}] Error on closing log file [{}]", parentSockThread.getThreadNumber(),iOException.getMessage());
+                }
+            }
         }
     }
 

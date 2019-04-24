@@ -35,6 +35,10 @@ public class SockThread extends Thread {
     private SubSockThread sourceOutputToDestinationInputThread;
     private SubSockThread destinationOutputToSourceInputThread;
 
+    public long getThreadNumber(){
+        return threadNumber;
+    }
+    
     /**
      *
      * @param sock

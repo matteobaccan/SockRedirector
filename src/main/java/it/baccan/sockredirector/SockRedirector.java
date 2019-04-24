@@ -45,6 +45,9 @@ public class SockRedirector extends Thread {
     public void init() {
         final String initFile = "sockRedirector.ini";
 
+        System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8");
+        System.setProperty("sun.net.spi.nameservice.provider.1", "dns,sun");
+
         LOG.info("+---------------------------------------------------------------------------+");
         LOG.info("| TCP/IP Port Redirector                                                    |");
         LOG.info("| Matteo Baccan Opensource Software                    http://www.baccan.it |");
