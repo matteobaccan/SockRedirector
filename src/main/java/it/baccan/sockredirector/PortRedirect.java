@@ -47,8 +47,7 @@ public class PortRedirect extends Thread {
     @Override
     public final void run() {
         Thread thread;
-        try {                                  // port, maxrequest, address
-            ServerSocket sock = new ServerSocket(serverPojo.getSourcePort(), serverPojo.getMaxclient(), InetAddress.getByName(serverPojo.getSourceAddress()));
+        try (ServerSocket sock = new ServerSocket(serverPojo.getSourcePort(), serverPojo.getMaxclient(), InetAddress.getByName(serverPojo.getSourceAddress()))) {
             while (true) {
                 // Faccio partire il Thread
                 Socket socket = sock.accept();

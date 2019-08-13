@@ -38,21 +38,21 @@ public class SubSockThread extends Thread {
     /**
      *
      * @param parent
-     * @param SO
-     * @param SI
+     * @param outputStream
+     * @param inputStream
      * @param file
      * @param bLog
      * @param nSize
      */
     public SubSockThread(SockThread parent,
-            OutputStream SO,
-            InputStream SI,
+            OutputStream outputStream,
+            InputStream inputStream,
             String file,
             boolean bLog,
             int nSize) {
         this.parentSockThread = parent;
-        this.sourceOutputStream = SO;
-        this.sourceInputStream = SI;
+        this.sourceOutputStream = outputStream;
+        this.sourceInputStream = inputStream;
         this.outputFileLog = file;
         this.outputLog = bLog;
         this.nSize = nSize;

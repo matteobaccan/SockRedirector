@@ -115,7 +115,8 @@ public class SockRedirector extends Thread {
             LOG.info("All system ready. Type \"help\" for debug info");
 
         } catch (IOException e) {
-            LOG.error("Error during opening of " + initFile, e);
+            LOG.error("Error during opening of [{}]", initFile);
+            LOG.error("IOException", e);
         }
     }
 
