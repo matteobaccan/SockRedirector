@@ -55,7 +55,7 @@
                 <version>3.8.1</version>
                 <configuration>
                     <showDeprecation>true</showDeprecation>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>     
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
@@ -135,6 +135,7 @@
                             </classPath>
                             <jre>
                                 <minVersion>1.8.0</minVersion>
+                                <path>%JAVA_HOME%</path>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${project.version}.0</fileVersion>
