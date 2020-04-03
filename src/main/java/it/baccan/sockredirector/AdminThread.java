@@ -6,9 +6,6 @@
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
  */
- /*
- * Debug Thread
- */
 package it.baccan.sockredirector;
 
 import java.io.BufferedReader;
@@ -20,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Classe generica di amministrazione del thread
+ * Admin thread.
  *
- * @author Matteo Baccan <matteo@baccan.it>
+ * @author Matteo Baccan
  * @version 1.0
  */
 public class AdminThread extends Thread {
@@ -95,7 +92,7 @@ public class AdminThread extends Thread {
         threadSet.forEach((Thread thread) -> {
             String info = getThreadInfo(thread);
             // If is in filter and the tread is not System
-            if ((filter.isEmpty() || info.contains(filter)) 
+            if ((filter.isEmpty() || info.contains(filter))
                     && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))) {
                 LOG.info(info);
             }

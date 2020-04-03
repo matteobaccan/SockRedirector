@@ -9,6 +9,8 @@
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
+import it.baccan.sockredirector.util.SocketFlow;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -16,14 +18,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Matteo Baccan <matteo@baccan.it>
+ * @author Matteo Baccan
  */
-public class SockThread extends Thread {
+public class ServerSocketThread extends Thread {
 
     /**
      * Logger.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(SockThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServerSocketThread.class);
     /**
      *
      */
@@ -32,19 +34,24 @@ public class SockThread extends Thread {
     private long threadNumber = 0;
     private final ServerPojo serverPojo;
     private final Socket socketIn;
-    private SubSockThread sourceOutputToDestinationInputThread;
-    private SubSockThread destinationOutputToSourceInputThread;
+    private FlowThread sourceOutputToDestinationInputThread;
+    private FlowThread destinationOutputToSourceInputThread;
 
-    public long getThreadNumber(){
+    /**
+     * Current htread number.
+     *
+     * @return
+     */
+    public long getThreadNumber() {
         return threadNumber;
     }
-    
+
     /**
      *
      * @param sock
      * @param server
      */
-    public SockThread(Socket sock, ServerPojo server) {
+    public ServerSocketThread(Socket sock, ServerPojo server) {
         socketIn = sock;
         serverPojo = server;
         threadNumber = THREADTOTAL.incrementAndGet();
@@ -81,21 +88,27 @@ public class SockThread extends Thread {
         try (Socket socketOut = new Socket(serverPojo.getDestinationAddress(), serverPojo.getDestinationPort())) {
 
             // S -> D
-            sourceOutputToDestinationInputThread = new SubSockThread(this,
+            sourceOutputToDestinationInputThread = new FlowThread(this,
                     socketIn.getOutputStream(),
                     socketOut.getInputStream(),
                     serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".in" + threadNumber,
                     serverPojo.isLogger(),
-                    serverPojo.getBlockSize());
+                    serverPojo.getBlockSize(),
+                    SocketFlow.INBOUND,
+                    serverPojo.getInReadWait(),
+                    serverPojo.getInWriteWait());
             sourceOutputToDestinationInputThread.start();
 
             // D -> S
-            destinationOutputToSourceInputThread = new SubSockThread(this,
+            destinationOutputToSourceInputThread = new FlowThread(this,
                     socketOut.getOutputStream(),
                     socketIn.getInputStream(),
                     serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".out" + threadNumber,
                     serverPojo.isLogger(),
-                    serverPojo.getBlockSize());
+                    serverPojo.getBlockSize(),
+                    SocketFlow.OUTBOUND,
+                    serverPojo.getOutReadWait(),
+                    serverPojo.getOutWriteWait());
             destinationOutputToSourceInputThread.start();
 
             while (destinationOutputToSourceInputThread.isAlive() && sourceOutputToDestinationInputThread.isAlive()) {
@@ -111,7 +124,7 @@ public class SockThread extends Thread {
         } finally {
             try {
                 socketIn.close();
-            } catch (Throwable e) {
+            } catch (IOException e) {
                 LOG.error("Error on socket.close", e);
             }
         }

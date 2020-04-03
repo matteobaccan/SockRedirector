@@ -6,9 +6,6 @@
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
  */
- /*
- * portRedirector Engine
- */
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
@@ -21,8 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * PortRedirect engine.
  *
- * @author Matteo Baccan <matteo@baccan.it>
+ * @author Matteo Baccan
  */
 public class PortRedirect extends Thread {
 
@@ -34,6 +32,7 @@ public class PortRedirect extends Thread {
     private final ServerPojo serverPojo;
 
     /**
+     * PortRedirect constructor.
      *
      * @param server
      */
@@ -46,7 +45,6 @@ public class PortRedirect extends Thread {
 
     @Override
     public final void run() {
-        Thread thread;
         try (ServerSocket sock = new ServerSocket(serverPojo.getSourcePort(), serverPojo.getMaxclient(), InetAddress.getByName(serverPojo.getSourceAddress()))) {
             while (true) {
                 // Faccio partire il Thread
@@ -57,7 +55,7 @@ public class PortRedirect extends Thread {
                     socket.setSoTimeout(serverPojo.getTimeout() * 1000);
                 }
 
-                thread = new SockThread(socket, serverPojo);
+                Thread thread = new ServerSocketThread(socket, serverPojo);
                 thread.start();
             }
         } catch (BindException bind) {

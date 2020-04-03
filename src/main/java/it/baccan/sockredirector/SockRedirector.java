@@ -6,9 +6,6 @@
  * file LICENSE or http://www.gnu.org/licenses/gpl.html.
  *
  */
- /*
- * socketRedirector server
- */
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
@@ -20,8 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Sock redirector server.
  *
- * @author Matteo Baccan <matteo@baccan.it>
+ * @author Matteo Baccan
  */
 public class SockRedirector extends Thread {
 
@@ -68,51 +66,59 @@ public class SockRedirector extends Thread {
         LOG.info("Opening [{}] ...", initFile);
         try {
             byte[] buffer;
-            // Leggo il file di specifiche
-            try (InputStream fInput = new FileInputStream(initFile)) {
-                buffer = new byte[fInput.available()];
-                fInput.read(buffer);
+            File config = new File(initFile);
+            if (config.exists()) {
+                // Leggo il file di specifiche
+                try (InputStream fInput = new FileInputStream(initFile)) {
+                    buffer = new byte[fInput.available()];
+                    fInput.read(buffer);
+                }
+                String cFileReaded = new String(buffer);
+
+                // Essendo in formato XML mi limito a prendere i vari blocchi di
+                // redirezione
+                String cIni = "<redirection>";
+                String cEnd = "</redirection>";
+                int nPosIni = cFileReaded.indexOf(cIni);
+                int nPosEnd = cFileReaded.indexOf(cEnd);
+
+                // Create admin process
+                AdminThread admin = new AdminThread();
+                while (nPosEnd > nPosIni) {
+                    String cXML = cFileReaded.substring(nPosIni, nPosEnd + cEnd.length());
+
+                    // Service definition
+                    ServerPojo serverPojo = new ServerPojo();
+                    serverPojo.setSourceAddress(getToken(cXML, "source"));
+                    serverPojo.setSourcePort(Integer.parseInt(getToken(cXML, "sourceport")));
+                    serverPojo.setDestinationAddress(getToken(cXML, "destination"));
+                    serverPojo.setDestinationPort(Integer.parseInt(getToken(cXML, "destinationport")));
+                    serverPojo.setLogger(getToken(cXML, "log", "false").equalsIgnoreCase("true"));
+                    serverPojo.setTimeout(Integer.parseInt(getToken(cXML, "timeout", "0")));
+                    serverPojo.setMaxclient(Integer.parseInt(getToken(cXML, "client", "10")));
+                    serverPojo.setBlockSize(Integer.parseInt(getToken(cXML, "blocksize", "64000")));
+                    serverPojo.setInReadWait(Long.parseLong(getToken(cXML, "inReadWait", "0")));
+                    serverPojo.setInWriteWait(Long.parseLong(getToken(cXML, "inWriteWait", "0")));
+                    serverPojo.setOutReadWait(Long.parseLong(getToken(cXML, "outReadWait", "0")));
+                    serverPojo.setOutWriteWait(Long.parseLong(getToken(cXML, "outWriteWait", "0")));
+
+                    // Start server
+                    PortRedirect server = new PortRedirect(serverPojo);
+                    server.start();
+
+                    // Cerco il blocco successivo
+                    cFileReaded = cFileReaded.substring(nPosEnd + cEnd.length());
+                    nPosIni = cFileReaded.indexOf(cIni);
+                    nPosEnd = cFileReaded.indexOf(cEnd);
+                }
+                // Start admin
+                admin.start();
+
+                LOG.info("");
+                LOG.info("All system ready. Type \"help\" for debug info");
+            } else {
+                LOG.error("Missing configuration file [{}]", config.getAbsolutePath());
             }
-            String cFileReaded = new String(buffer);
-
-            // Essendo in formato XML mi limito a prendere i vari blocchi di
-            // redirezione
-            String cIni = "<redirection>";
-            String cEnd = "</redirection>";
-            int nPosIni = cFileReaded.indexOf(cIni);
-            int nPosEnd = cFileReaded.indexOf(cEnd);
-
-            // Create admin process
-            AdminThread admin = new AdminThread();
-            while (nPosEnd > nPosIni) {
-                String cXML = cFileReaded.substring(nPosIni, nPosEnd + cEnd.length());
-
-                ServerPojo serverPojo = new ServerPojo();
-                serverPojo.setSourceAddress(getToken(cXML, "source"));
-                serverPojo.setSourcePort(Integer.parseInt(getToken(cXML, "sourceport")));
-                serverPojo.setDestinationAddress(getToken(cXML, "destination"));
-                serverPojo.setDestinationPort(Integer.parseInt(getToken(cXML, "destinationport")));
-                serverPojo.setLogger(getToken(cXML, "log", "false").equalsIgnoreCase("true"));
-
-                // Se uno notes deve essere messo a 0
-                serverPojo.setTimeout(Integer.parseInt(getToken(cXML, "timeout", "0")));
-                serverPojo.setMaxclient(Integer.parseInt(getToken(cXML, "client", "10")));
-
-                serverPojo.setBlockSize(Integer.parseInt(getToken(cXML, "blocksize", "64000")));
-
-                PortRedirect server = new PortRedirect(serverPojo);
-                server.start();
-
-                // Cerco il blocco successivo
-                cFileReaded = cFileReaded.substring(nPosEnd + cEnd.length());
-                nPosIni = cFileReaded.indexOf(cIni);
-                nPosEnd = cFileReaded.indexOf(cEnd);
-            }
-            // Start admin
-            admin.start();
-
-            LOG.info("");
-            LOG.info("All system ready. Type \"help\" for debug info");
 
         } catch (IOException e) {
             LOG.error("Error during opening of [{}]", initFile);

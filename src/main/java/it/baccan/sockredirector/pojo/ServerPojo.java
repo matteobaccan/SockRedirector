@@ -8,14 +8,13 @@
  */
 package it.baccan.sockredirector.pojo;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  *
- * @author Matteo
+ * @author Matteo Baccan
  */
-@Setter @Getter
+@Data
 public class ServerPojo {
 
     private String sourceAddress;
@@ -26,4 +25,9 @@ public class ServerPojo {
     private int timeout;
     private int maxclient;
     private int blockSize;
+    private long inReadWait;
+    private long inWriteWait;
+    private long outReadWait;
+    private long outWriteWait;
+
 }
