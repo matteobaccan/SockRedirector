@@ -116,25 +116,25 @@ public class AdminThread extends Thread {
                 String info = getThreadInfo(thread);
                 // If is in filter and the tread is not System
                 if ((th[0].isEmpty() || info.contains(th[0]))
-                        && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))) {
+                        && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))
+                        && thread instanceof FlowThread) {
 
-                    if (thread instanceof FlowThread) {
-                        FlowThread flowThread = (FlowThread) thread;
-                        try {
-                            if (th.length > 1) {
-                                flowThread.setReadPause(Long.parseLong(th[1]));
-                            }
-                        } catch (NumberFormatException numberFormatException) {
-                            LOG.error("Wrong number [{}]", th[1]);
+                    FlowThread flowThread = (FlowThread) thread;
+                    try {
+                        if (th.length > 1) {
+                            flowThread.setReadPause(Long.parseLong(th[1]));
                         }
-                        try {
-                            if (th.length > 2) {
-                                flowThread.setWritePause(Long.parseLong(th[2]));
-                            }
-                        } catch (NumberFormatException numberFormatException) {
-                            LOG.error("Wrong number [{}]", th[2]);
-                        }
+                    } catch (NumberFormatException numberFormatException) {
+                        LOG.error("Wrong number [{}]", th[1]);
                     }
+                    try {
+                        if (th.length > 2) {
+                            flowThread.setWritePause(Long.parseLong(th[2]));
+                        }
+                    } catch (NumberFormatException numberFormatException) {
+                        LOG.error("Wrong number [{}]", th[2]);
+                    }
+
                 }
             });
         }
@@ -170,19 +170,19 @@ public class AdminThread extends Thread {
         try {
             if (thread instanceof FlowThread) {
                 FlowThread flowThread = (FlowThread) thread;
-                sb.append(((FlowThread) thread).getParentSockThread().getServerPojo().getSourceAddress());
-                sb.append(":").append(((FlowThread) thread).getParentSockThread().getServerPojo().getSourcePort());
-                if (((FlowThread) thread).getSocketFlow() == SocketFlow.OUTBOUND) {
+                sb.append(flowThread.getParentSockThread().getServerPojo().getSourceAddress());
+                sb.append(":").append(flowThread.getParentSockThread().getServerPojo().getSourcePort());
+                if (flowThread.getSocketFlow() == SocketFlow.OUTBOUND) {
                     sb.append("->");
                 } else {
                     sb.append("<-");
                 }
-                sb.append(((FlowThread) thread).getSocketFlow().name());
+                sb.append(flowThread.getSocketFlow().name());
                 sb.append(" readPause[");
-                sb.append(((FlowThread) thread).getReadPause());
+                sb.append(flowThread.getReadPause());
                 sb.append("]");
                 sb.append(" writePause[");
-                sb.append(((FlowThread) thread).getWritePause());
+                sb.append(flowThread.getWritePause());
                 sb.append("]");
 
                 sb.append(" ID[").append(String.format("%1$5d", thread.getId())).append("]");
