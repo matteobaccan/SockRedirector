@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Matteo
+ * @author Matteo Baccan
  */
 public class FlowThread extends Thread {
 
@@ -36,8 +36,8 @@ public class FlowThread extends Thread {
     private final boolean outputLog;
     private final int size;
     private final SocketFlow socketFlow;
-    private final long readPause;
-    private final long writePause;
+    private long readPause;
+    private long writePause;
 
     /**
      * FlowThread constructor.
@@ -79,7 +79,7 @@ public class FlowThread extends Thread {
         runNormal();
 
         // Distruggo tutti i processi
-        parentSockThread.killProcess();
+        getParentSockThread().killProcess();
     }
 
     private void runNormal() {
@@ -99,7 +99,7 @@ public class FlowThread extends Thread {
             while (true) {
                 if (firstPause) {
                     firstPause = false;
-                    socketPause(readPause);
+                    socketPause(getReadPause());
                 }
                 // Leggo un singolo byte
                 try {
@@ -110,13 +110,13 @@ public class FlowThread extends Thread {
                 } catch (SocketException se) {
                     if ("Socket closed".equals(se.getMessage())) {
                         // Chiusura della connessione
-                        LOG.info("[{}][{}] Socket closed", socketFlow.name(), parentSockThread.getThreadNumber());
+                        LOG.info("[{}][{}] Socket closed", getSocketFlow().name(), getParentSockThread().getThreadNumber());
                     } else {
-                        LOG.error("[{}][{}] SocketException [{}]", socketFlow.name(), parentSockThread.getThreadNumber(), se.getMessage());
+                        LOG.error("[{}][{}] SocketException [{}]", getSocketFlow().name(), getParentSockThread().getThreadNumber(), se.getMessage());
                     }
                     break;
                 } catch (IOException e) {
-                    LOG.error("[{}][{}] readError [{}]", socketFlow.name(), parentSockThread.getThreadNumber(), e.getMessage());
+                    LOG.error("[{}][{}] readError [{}]", getSocketFlow().name(), getParentSockThread().getThreadNumber(), e.getMessage());
                     break;
                 }
 
@@ -129,11 +129,8 @@ public class FlowThread extends Thread {
 
                 // Write bytes if there arent new bytes to read or buffer is full
                 if (bufferPosition >= size || bytesToRead == 0) {
-                    socketPause(writePause);
-                    sourceOutputStream.write(buffer, 0, bufferPosition);
-                    if (logFile != null) {
-                        logFile.write(buffer, 0, bufferPosition);
-                    }
+                    socketPause(getWritePause());
+                    logData(logFile, buffer, bufferPosition);
                     bufferPosition = 0;
                     firstPause = true;
                 }
@@ -141,21 +138,18 @@ public class FlowThread extends Thread {
             }
 
             // Write last bytes
-            socketPause(writePause);
-            sourceOutputStream.write(buffer, 0, bufferPosition);
-            if (logFile != null) {
-                logFile.write(buffer, 0, bufferPosition);
-            }
+            socketPause(getWritePause());
+            logData(logFile, buffer, bufferPosition);
         } catch (ThreadDeath td) {
-            LOG.error("[{}][{}] ThreadDeath on runNormal [{}]", socketFlow.name(), parentSockThread.getThreadNumber(), td.getMessage());
+            LOG.error("[{}][{}] ThreadDeath on runNormal [{}]", getSocketFlow().name(), getParentSockThread().getThreadNumber(), td.getMessage());
         } catch (IOException e) {
-            LOG.error("[{}][{}] Error on runNormal [{}]", socketFlow.name(), parentSockThread.getThreadNumber(), e.getMessage());
+            LOG.error("[{}][{}] Error on runNormal [{}]", getSocketFlow().name(), getParentSockThread().getThreadNumber(), e.getMessage());
         } finally {
             if (logFile != null) {
                 try {
                     logFile.close();
                 } catch (IOException iOException) {
-                    LOG.error("[{}][{}] Error on closing log file [{}]", socketFlow.name(), parentSockThread.getThreadNumber(), iOException.getMessage());
+                    LOG.error("[{}][{}] Error on closing log file [{}]", getSocketFlow().name(), getParentSockThread().getThreadNumber(), iOException.getMessage());
                 }
             }
         }
@@ -163,12 +157,60 @@ public class FlowThread extends Thread {
 
     private void socketPause(long readPause) {
         if (readPause > 0) {
-            LOG.info("[{}] pause of [{}] ms",socketFlow.name(), readPause);
             try {
                 sleep(readPause);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    /**
+     * @return the readPause
+     */
+    public long getReadPause() {
+        return readPause;
+    }
+
+    /**
+     * @param readPause the readPause to set
+     */
+    public void setReadPause(long readPause) {
+        this.readPause = readPause;
+    }
+
+    /**
+     * @return the writePause
+     */
+    public long getWritePause() {
+        return writePause;
+    }
+
+    /**
+     * @param writePause the writePause to set
+     */
+    public void setWritePause(long writePause) {
+        this.writePause = writePause;
+    }
+
+    /**
+     * @return the parentSockThread
+     */
+    public ServerSocketThread getParentSockThread() {
+        return parentSockThread;
+    }
+
+    /**
+     * @return the socketFlow
+     */
+    public SocketFlow getSocketFlow() {
+        return socketFlow;
+    }
+
+    private void logData(final RandomAccessFile logFile, final byte[] buffer, final int bufferPosition) throws IOException {
+        sourceOutputStream.write(buffer, 0, bufferPosition);
+        if (logFile != null) {
+            logFile.write(buffer, 0, bufferPosition);
         }
     }
 

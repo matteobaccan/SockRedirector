@@ -8,6 +8,7 @@
  */
 package it.baccan.sockredirector;
 
+import it.baccan.sockredirector.util.SocketFlow;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,32 +50,37 @@ public class AdminThread extends Thread {
                 line = line.trim();
 
                 int nSpace = line.indexOf(' ');
-                String cCommand;
-                String cParam = "";
+                String command;
+                String parameter = "";
 
                 if (nSpace != -1) {
-                    cCommand = line.substring(0, nSpace).trim();
-                    cParam = line.substring(nSpace).trim();
+                    command = line.substring(0, nSpace).trim();
+                    parameter = line.substring(nSpace).trim();
                 } else {
-                    cCommand = line;
+                    command = line;
                 }
 
-                if (cCommand.equalsIgnoreCase("help")) {
+                if (command.equalsIgnoreCase("help")) {
                     LOG.info("");
                     LOG.info("help                      - this help");
                     LOG.info("exit                      - exit program");
                     LOG.info("thread [filter]           - thread list");
                     LOG.info("kill <nth> [... [<nth>]]  - kill nth thread");
+                    LOG.info("pause <nth> <readPause> <writePause> - set pause on nth thread");
                     LOG.info("");
-                } else if (cCommand.equalsIgnoreCase("exit")) {
+                } else if (command.equalsIgnoreCase("exit")) {
                     Runtime.getRuntime().halt(0);
-                } else if (cCommand.equalsIgnoreCase("thread")) {
+                } else if (command.equalsIgnoreCase("thread")) {
                     LOG.info("");
-                    dumpThread(cParam);
+                    dumpThread(parameter);
                     LOG.info("");
-                } else if (cCommand.equalsIgnoreCase("kill")) {
+                } else if (command.equalsIgnoreCase("pause")) {
                     LOG.info("");
-                    String[] th = cParam.split(" ");
+                    pauseThread(parameter);
+                    LOG.info("");
+                } else if (command.equalsIgnoreCase("kill")) {
+                    LOG.info("");
+                    String[] th = parameter.split(" ");
                     for (String t : th) {
                         kill(t);
                     }
@@ -93,10 +99,45 @@ public class AdminThread extends Thread {
             String info = getThreadInfo(thread);
             // If is in filter and the tread is not System
             if ((filter.isEmpty() || info.contains(filter))
-                    && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))) {
+                    && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))
+                    && info.length() > 0) {
                 LOG.info(info);
             }
         });
+    }
+
+    private void pauseThread(String parameter) {
+        String[] th = parameter.split(" ");
+
+        // Ask all threads to JVM
+        if (th.length > 0) {
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            threadSet.forEach((Thread thread) -> {
+                String info = getThreadInfo(thread);
+                // If is in filter and the tread is not System
+                if ((th[0].isEmpty() || info.contains(th[0]))
+                        && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))) {
+
+                    if (thread instanceof FlowThread) {
+                        FlowThread flowThread = (FlowThread) thread;
+                        try {
+                            if (th.length > 1) {
+                                flowThread.setReadPause(Long.parseLong(th[1]));
+                            }
+                        } catch (NumberFormatException numberFormatException) {
+                            LOG.error("Wrong number [{}]", th[1]);
+                        }
+                        try {
+                            if (th.length > 2) {
+                                flowThread.setWritePause(Long.parseLong(th[2]));
+                            }
+                        } catch (NumberFormatException numberFormatException) {
+                            LOG.error("Wrong number [{}]", th[2]);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void kill(final String cThread) {
@@ -127,23 +168,42 @@ public class AdminThread extends Thread {
     private String getThreadInfo(final Thread thread) {
         StringBuilder sb = new StringBuilder(128);
         try {
-            sb.append(" ID[").append(String.format("%1$5d", thread.getId())).append("]");
-            sb.append(" STATE[").append(thread.getState()).append("]");
-            sb.append(" PRIORITY[").append(thread.getPriority()).append("]");
-            ThreadGroup threadGroup = thread.getThreadGroup();
-            if (threadGroup != null) {
-                sb.append(" GROUP[").append(threadGroup.getName()).append("]");
+            if (thread instanceof FlowThread) {
+                FlowThread flowThread = (FlowThread) thread;
+                sb.append(((FlowThread) thread).getParentSockThread().getServerPojo().getSourceAddress());
+                sb.append(":").append(((FlowThread) thread).getParentSockThread().getServerPojo().getSourcePort());
+                if (((FlowThread) thread).getSocketFlow() == SocketFlow.OUTBOUND) {
+                    sb.append("->");
+                } else {
+                    sb.append("<-");
+                }
+                sb.append(((FlowThread) thread).getSocketFlow().name());
+                sb.append(" readPause[");
+                sb.append(((FlowThread) thread).getReadPause());
+                sb.append("]");
+                sb.append(" writePause[");
+                sb.append(((FlowThread) thread).getWritePause());
+                sb.append("]");
+
+                sb.append(" ID[").append(String.format("%1$5d", thread.getId())).append("]");
+                sb.append(" [").append((thread.getClass().getSimpleName() + "                    ").substring(0, 20)).append("]");
+                sb.append(" STATE[").append(thread.getState()).append("]");
+                sb.append(" PRIORITY[").append(thread.getPriority()).append("]");
+                ThreadGroup threadGroup = thread.getThreadGroup();
+                if (threadGroup != null) {
+                    sb.append(" GROUP[").append(threadGroup.getName()).append("]");
+                }
+                if (thread.isDaemon()) {
+                    sb.append(" [daemon]");
+                }
+                if (thread.isAlive()) {
+                    sb.append(" [alive]");
+                }
+                if (thread.isInterrupted()) {
+                    sb.append(" [interrupted]");
+                }
+                sb.append(" ").append(thread.getName());
             }
-            if (thread.isDaemon()) {
-                sb.append(" [daemon]");
-            }
-            if (thread.isAlive()) {
-                sb.append(" [alive]");
-            }
-            if (thread.isInterrupted()) {
-                sb.append(" [interrupted]");
-            }
-            sb.append(" ").append(thread.getName());
         } catch (Exception exception) {
             LOG.error("getThreadInfo error", exception);
         }

@@ -81,34 +81,34 @@ public class ServerSocketThread extends Thread {
 
     @Override
     public void run() {
-        if (serverPojo.isLogger()) {
+        if (getServerPojo().isLogger()) {
             LOG.info("[{}] new user [{}]", threadNumber, socketIn);
         }
 
-        try (Socket socketOut = new Socket(serverPojo.getDestinationAddress(), serverPojo.getDestinationPort())) {
+        try (Socket socketOut = new Socket(getServerPojo().getDestinationAddress(), getServerPojo().getDestinationPort())) {
 
             // S -> D
             sourceOutputToDestinationInputThread = new FlowThread(this,
                     socketIn.getOutputStream(),
                     socketOut.getInputStream(),
-                    serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".in" + threadNumber,
-                    serverPojo.isLogger(),
-                    serverPojo.getBlockSize(),
-                    SocketFlow.INBOUND,
-                    serverPojo.getInReadWait(),
-                    serverPojo.getInWriteWait());
+                    getServerPojo().getDestinationAddress() + "-" + getServerPojo().getDestinationPort() + ".in" + threadNumber,
+                    getServerPojo().isLogger(),
+                    getServerPojo().getBlockSize(),
+                    SocketFlow.OUTBOUND,
+                    getServerPojo().getOutReadWait(),
+                    getServerPojo().getOutWriteWait());
             sourceOutputToDestinationInputThread.start();
 
             // D -> S
             destinationOutputToSourceInputThread = new FlowThread(this,
                     socketOut.getOutputStream(),
                     socketIn.getInputStream(),
-                    serverPojo.getDestinationAddress() + "-" + serverPojo.getDestinationPort() + ".out" + threadNumber,
-                    serverPojo.isLogger(),
-                    serverPojo.getBlockSize(),
-                    SocketFlow.OUTBOUND,
-                    serverPojo.getOutReadWait(),
-                    serverPojo.getOutWriteWait());
+                    getServerPojo().getDestinationAddress() + "-" + getServerPojo().getDestinationPort() + ".out" + threadNumber,
+                    getServerPojo().isLogger(),
+                    getServerPojo().getBlockSize(),
+                    SocketFlow.INBOUND,
+                    getServerPojo().getInReadWait(),
+                    getServerPojo().getInWriteWait());
             destinationOutputToSourceInputThread.start();
 
             while (destinationOutputToSourceInputThread.isAlive() && sourceOutputToDestinationInputThread.isAlive()) {
@@ -119,7 +119,7 @@ public class ServerSocketThread extends Thread {
             LOG.info("InterruptedException [{}]", e.getMessage());
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            LOG.error("[{}] host:port [{}:{}]", threadNumber, serverPojo.getDestinationAddress(), serverPojo.getDestinationPort());
+            LOG.error("[{}] host:port [{}:{}]", threadNumber, getServerPojo().getDestinationAddress(), getServerPojo().getDestinationPort());
             LOG.error("Unknow error", e);
         } finally {
             try {
@@ -129,10 +129,17 @@ public class ServerSocketThread extends Thread {
             }
         }
 
-        if (serverPojo.isLogger()) {
+        if (getServerPojo().isLogger()) {
             LOG.info("[{}] disconnect", threadNumber);
         }
 
+    }
+
+    /**
+     * @return the serverPojo
+     */
+    public ServerPojo getServerPojo() {
+        return serverPojo;
     }
 
 }
