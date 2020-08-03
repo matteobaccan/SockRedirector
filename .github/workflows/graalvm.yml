@@ -1,0 +1,19 @@
+name: Setup GraalVM environment
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@latest
+      - uses: DeLaGuardo/setup-graalvm@3
+        with:
+          graalvm-version: '19.3.0.java8'
+      - run: mvn -B package --file pom.xml
