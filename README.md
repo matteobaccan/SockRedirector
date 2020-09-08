@@ -8,6 +8,13 @@
 [![stability status](https://www.meterian.io/badge/gh/matteobaccan/SockRedirector/stability)](https://www.meterian.io/report/gh/matteobaccan/SockRedirector)
 [![DepShield Badge](https://depshield.sonatype.org/badges/matteobaccan/SockRedirector/depshield.svg)](https://depshield.github.io)
 
+<a href="https://github.com/matteobaccan/SockRedirector/stargazers"><img src="https://img.shields.io/github/stars/matteobaccan/SockRedirector" alt="Stars Badge"/></a>
+<a href="https://github.com/matteobaccan/SockRedirector/network/members"><img src="https://img.shields.io/github/forks/matteobaccan/SockRedirector" alt="Forks Badge"/></a>
+<a href="https://github.com/matteobaccan/SockRedirector/pulls"><img src="https://img.shields.io/github/issues-pr/matteobaccan/SockRedirector" alt="Pull Requests Badge"/></a>
+<a href="https://github.com/matteobaccan/SockRedirector/issues"><img src="https://img.shields.io/github/issues/matteobaccan/SockRedirector" alt="Issues Badge"/></a>
+<a href="https://github.com/matteobaccan/SockRedirector/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/matteobaccan/SockRedirector?color=2b9348"></a>
+<a href="https://github.com/matteobaccan/SockRedirector/blob/master/LICENSE"><img src="https://img.shields.io/github/license/matteobaccan/SockRedirector?color=2b9348" alt="License Badge"/></a>
+
 Redirects TCP connections from one IP address and port to another
 
 I have used this tool for many years. This tool allow to redirect the TCP data from a port of one ip to another remote port of a remote machine.
