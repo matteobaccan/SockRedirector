@@ -8,6 +8,7 @@
  */
 package it.baccan.sockredirector;
 
+import it.baccan.sockredirector.pojo.FlowThreadPojo;
 import it.baccan.sockredirector.util.SocketFlow;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -113,28 +114,29 @@ public class AdminThread extends Thread {
         if (th.length > 0) {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             threadSet.forEach((Thread thread) -> {
-                String info = getThreadInfo(thread);
-                // If is in filter and the tread is not System
-                if ((th[0].isEmpty() || info.contains(th[0]))
-                        && (thread.getThreadGroup() != null && !"system".equals(thread.getThreadGroup().getName()))
-                        && thread instanceof FlowThread) {
-
+                if (thread instanceof FlowThread) {
                     FlowThread flowThread = (FlowThread) thread;
-                    try {
-                        if (th.length > 1) {
-                            flowThread.setReadPause(Long.parseLong(th[1]));
-                        }
-                    } catch (NumberFormatException numberFormatException) {
-                        LOG.error("Wrong number [{}]", th[1]);
-                    }
-                    try {
-                        if (th.length > 2) {
-                            flowThread.setWritePause(Long.parseLong(th[2]));
-                        }
-                    } catch (NumberFormatException numberFormatException) {
-                        LOG.error("Wrong number [{}]", th[2]);
-                    }
 
+                    String info = getThreadInfo(thread);
+                    // If is in filter and the tread is not System
+                    if ((th[0].isEmpty() || ("" + thread.getId()).equals(th[0]))) {
+
+                        try {
+                            if (th.length > 1) {
+                                flowThread.setReadPause(Long.parseLong(th[1]));
+                            }
+                        } catch (NumberFormatException numberFormatException) {
+                            LOG.error("Wrong number [{}]", th[1]);
+                        }
+                        try {
+                            if (th.length > 2) {
+                                flowThread.setWritePause(Long.parseLong(th[2]));
+                            }
+                        } catch (NumberFormatException numberFormatException) {
+                            LOG.error("Wrong number [{}]", th[2]);
+                        }
+
+                    }
                 }
             });
         }
@@ -170,25 +172,33 @@ public class AdminThread extends Thread {
         try {
             if (thread instanceof FlowThread) {
                 FlowThread flowThread = (FlowThread) thread;
-                sb.append(flowThread.getParentSockThread().getServerPojo().getSourceAddress());
-                sb.append(":").append(flowThread.getParentSockThread().getServerPojo().getSourcePort());
+
+                sb.append(padRight(flowThread.getParentSockThread().getServerPojo().getSourceAddress(), 15));
+                sb.append("|");
+                sb.append(padRight("" + flowThread.getParentSockThread().getServerPojo().getSourcePort(), 5));
+                sb.append("|");
                 if (flowThread.getSocketFlow() == SocketFlow.OUTBOUND) {
                     sb.append("->");
                 } else {
                     sb.append("<-");
                 }
-                sb.append(flowThread.getSocketFlow().name());
-                sb.append(" readPause[");
-                sb.append(flowThread.getReadPause());
-                sb.append("]");
-                sb.append(" writePause[");
-                sb.append(flowThread.getWritePause());
-                sb.append("]");
-
-                sb.append(" ID[").append(String.format("%1$5d", thread.getId())).append("]");
-                sb.append(" [").append((thread.getClass().getSimpleName() + "                    ").substring(0, 20)).append("]");
-                sb.append(" STATE[").append(thread.getState()).append("]");
-                sb.append(" PRIORITY[").append(thread.getPriority()).append("]");
+                sb.append("|");
+                sb.append(padRight(flowThread.getSocketFlow().name(), 20));
+                sb.append("|");
+                sb.append(padRight("" + flowThread.getReadPause(), 5));
+                sb.append("|");
+                sb.append(padRight("" + flowThread.getWritePause(), 5));
+                sb.append("|");
+                sb.append(String.format("%1$5d", thread.getId()));
+                sb.append("|");
+                sb.append(padRight(thread.getClass().getSimpleName(), 20));
+                /*
+                sb.append("|");
+                sb.append(padRight(thread.getState().name(), 10));
+                sb.append("|");
+                sb.append(padRight("" + thread.getPriority(), 10));
+                 */
+ /*
                 ThreadGroup threadGroup = thread.getThreadGroup();
                 if (threadGroup != null) {
                     sb.append(" GROUP[").append(threadGroup.getName()).append("]");
@@ -202,11 +212,17 @@ public class AdminThread extends Thread {
                 if (thread.isInterrupted()) {
                     sb.append(" [interrupted]");
                 }
-                sb.append(" ").append(thread.getName());
+                 */
+                sb.append("|");
+                sb.append(padRight(thread.getName(), 20));
             }
         } catch (Exception exception) {
             LOG.error("getThreadInfo error", exception);
         }
         return sb.toString();
+    }
+
+    private String padRight(final String string, final int len) {
+        return String.format("%-" + len + "s", string);
     }
 }
