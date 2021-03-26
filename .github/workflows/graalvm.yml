@@ -8,7 +8,6 @@ on:
 
 jobs:
 
-
   build:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,7 +36,13 @@ jobs:
       - name: Install native-image component
         run: |
           ${{ matrix.gu-binary }} install native-image
-      
+          
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # We must fetch at least the immediate parents so that if this is
+          # a pull request then we can checkout the head.
+          fetch-depth: 2
+
       - name: Call maven
-        run: |
-          mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml
