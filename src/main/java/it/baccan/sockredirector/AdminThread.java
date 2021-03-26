@@ -8,7 +8,6 @@
  */
 package it.baccan.sockredirector;
 
-import it.baccan.sockredirector.pojo.FlowThreadPojo;
 import it.baccan.sockredirector.util.SocketFlow;
 import java.io.BufferedReader;
 import java.io.IOException;
