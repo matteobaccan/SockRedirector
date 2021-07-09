@@ -30,7 +30,6 @@ Java sockRedirector is written in Java.
 
 Use this program in Linux, Windows, AIX, AS/400 or all environment you want.
 
-
 ## Documentation
 
 ### sockRedirector.ini
@@ -52,8 +51,7 @@ Ini file is divided in several section For each section you can define these par
 | outReadWait | long | 0 | reading from source pause |
 | outWriteWait | long | 0 | write to source pause |
 
-
-  ## Example
+## Example
 ### Configuration Example (sockRedirector.ini)
 
 ```xml
