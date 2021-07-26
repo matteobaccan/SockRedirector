@@ -15,6 +15,7 @@
 <a href="https://github.com/matteobaccan/SockRedirector/issues"><img src="https://img.shields.io/github/issues/matteobaccan/SockRedirector" alt="Issues Badge"/></a>
 <a href="https://github.com/matteobaccan/SockRedirector/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/matteobaccan/SockRedirector?color=2b9348"></a>
 <a href="https://github.com/matteobaccan/SockRedirector/blob/master/LICENSE"><img src="https://img.shields.io/github/license/matteobaccan/SockRedirector?color=2b9348" alt="License Badge"/></a>
+[![GraalVM Build](https://github.com/matteobaccan/SockRedirector/actions/workflows/graalvm.yml/badge.svg)](https://github.com/matteobaccan/SockRedirector/actions/workflows/graalvm.yml)
 
 Redirects TCP connections from one IP address and port to another
 
