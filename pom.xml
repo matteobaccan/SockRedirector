@@ -132,7 +132,7 @@
                             <mainClass>it.baccan.sockredirector.SockRedirector</mainClass>
                             <buildArgs>-ea</buildArgs>
                             <imageName>Sockredirector</imageName>
-                            <skip>false</skip>
+                            <skip>true</skip>
                         </configuration>
                     </execution>
                 </executions>
