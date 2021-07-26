@@ -1,4 +1,4 @@
-name: Setup GraalVM environment
+name: GraalVM Build
 
 on:
   push:
