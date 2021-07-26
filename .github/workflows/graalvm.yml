@@ -23,10 +23,10 @@ jobs:
           # The JDK version to be installed with GraalVM. E.g. 8, 11. See https://github.com/graalvm/graalvm-ce-builds/releases
           java-version: 11 # optional
           # The version of GraalVM to make available on PATH. E.g. 20.1.0, 19.3.2. See https://github.com/graalvm/graalvm-ce-builds/releases
-          graalvm-version: 20.2.0
+          graalvm-version: 20.3.3
           # Install GraalVM Native Image
           native-image: true # optional
-      
+
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
