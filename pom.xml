@@ -131,7 +131,7 @@
                         <phase>package</phase>
                         <configuration>
                             <mainClass>it.baccan.sockredirector.SockRedirector</mainClass>
-                            <buildArgs>--no-fallback</buildArgs>
+                            <buildArgs>--no-fallback --allow-incomplete-classpath</buildArgs>
                             <imageName>Sockredirector</imageName>
                             <skip>false</skip>
                         </configuration>
