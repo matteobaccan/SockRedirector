@@ -38,8 +38,8 @@ jobs:
       - name: Windows msvc setup
         uses: ilammy/msvc-dev-cmd@v1.9.0
         if: ${{ matrix.os == 'windows-latest' }}
-        
-      - name: Windows msbuild setup        
+
+      - name: Windows msbuild setup
         uses: microsoft/setup-msbuild@v1
         if: ${{ matrix.os == 'windows-latest' }}
 
@@ -53,5 +53,32 @@ jobs:
           copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
+          git add *.exe
           git commit -m "[Automated] Added build files"
+
+      - name: Commit files
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          ls /home/runner/work/SockRedirector/SockRedirector/target/
+          #copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
+          #git config --local user.email "action@github.com"
+          #git config --local user.name "GitHub Action"
+          #git add *.exe
+          #git commit -m "[Automated] Added build files"
+
+      - name: Commit files
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          ls /Users/runner/work/SockRedirector/SockRedirector/target/
+          #copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
+          #git config --local user.email "action@github.com"
+          #git config --local user.name "GitHub Action"
+          #git add *.exe
+          #git commit -m "[Automated] Added build files"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+        if: ${{ matrix.os == 'windows-latest' }}
