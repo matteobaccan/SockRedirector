@@ -50,35 +50,33 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           dir D:\a\SockRedirector\SockRedirector\target\
-          copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
+          copy D:\a\SockRedirector\SockRedirector\target\sockredirector.exe   D:\a\SockRedirector\SockRedirector\executable\win
+          copy D:\a\SockRedirector\SockRedirector\target\sockredirector-*.exe D:\a\SockRedirector\SockRedirector\executable\win
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add *.exe
-          git commit -m "[Automated] Added build files"
+          git commit -m "[Automated] Added windows build files"
 
       - name: Commit files
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          ls /home/runner/work/SockRedirector/SockRedirector/target/
-          #copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
-          #git config --local user.email "action@github.com"
-          #git config --local user.name "GitHub Action"
-          #git add *.exe
-          #git commit -m "[Automated] Added build files"
+          cp /home/runner/work/SockRedirector/SockRedirector/target/Sockredirector /home/runner/work/SockRedirector/SockRedirector/executable/linux/Sockredirector
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "[Automated] Added Linux build files"
 
       - name: Commit files
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          ls /Users/runner/work/SockRedirector/SockRedirector/target/
-          #copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
-          #git config --local user.email "action@github.com"
-          #git config --local user.name "GitHub Action"
-          #git add *.exe
-          #git commit -m "[Automated] Added build files"
+          cp /Users/runner/work/SockRedirector/SockRedirector/target/Sockredirector /Users/runner/work/SockRedirector/SockRedirector/executable/mac/Sockredirector
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "[Automated] Added Msc build files"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
-        if: ${{ matrix.os == 'windows-latest' }}
