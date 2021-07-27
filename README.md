@@ -1,4 +1,3 @@
-
 # SockRedirector
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fce631c07eac48b682d8da9aee4b5301)](https://www.codacy.com/app/matteobaccan/SockRedirector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matteobaccan/SockRedirector&amp;utm_campaign=Badge_Grade)
@@ -36,7 +35,6 @@ Use this program in Linux, Windows, AIX, AS/400 or all environment you want.
 ### sockRedirector.ini
 Ini file is divided in several section For each section you can define these parameters
 
-
 |key| type | default | value  |
 |--|--|--|--|
 | source | string | **mandatory** | source ip to bind, listen on |
@@ -70,7 +68,6 @@ Ini file is divided in several section For each section you can define these par
    <outWriteWait>1000</outWriteWait>
 </redirection>
 ```
-
 ## Update
 ### 1.00
 First public release
