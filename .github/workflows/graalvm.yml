@@ -43,3 +43,11 @@ jobs:
 
       - name: Call maven
         run: mvn -B package --file pom.xml
+
+      - name: Commit files
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "[Automated] Added build files"
