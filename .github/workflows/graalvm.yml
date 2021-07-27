@@ -60,7 +60,7 @@ jobs:
       - name: Commit files
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          cp /home/runner/work/SockRedirector/SockRedirector/target/Sockredirector /home/runner/work/SockRedirector/SockRedirector/executable/linux/Sockredirector
+          cp /home/runner/work/SockRedirector/SockRedirector/target/Sockredirector /home/runner/work/SockRedirector/SockRedirector/executable/linux/
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
@@ -69,7 +69,7 @@ jobs:
       - name: Commit files
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          cp /Users/runner/work/SockRedirector/SockRedirector/target/Sockredirector /Users/runner/work/SockRedirector/SockRedirector/executable/mac/Sockredirector
+          cp /Users/runner/work/SockRedirector/SockRedirector/target/Sockredirector /Users/runner/work/SockRedirector/SockRedirector/executable/mac/
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
