@@ -50,7 +50,6 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           dir D:\a\SockRedirector\SockRedirector\target\
-          mkdir D:\a\SockRedirector\SockRedirector\executable
           copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
