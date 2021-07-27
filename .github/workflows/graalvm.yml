@@ -50,8 +50,8 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           dir D:\a\SockRedirector\SockRedirector\target\
-          copy D:\a\SockRedirector\SockRedirector\target\sockredirector.exe   D:\a\SockRedirector\SockRedirector\executable\win
-          copy D:\a\SockRedirector\SockRedirector\target\sockredirector-*.exe D:\a\SockRedirector\SockRedirector\executable\win
+          copy D:\a\SockRedirector\SockRedirector\target\sockredirector.exe   D:\a\SockRedirector\SockRedirector\executable\windows
+          copy D:\a\SockRedirector\SockRedirector\target\sockredirector-*.exe D:\a\SockRedirector\SockRedirector\executable\windows
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add *.exe
