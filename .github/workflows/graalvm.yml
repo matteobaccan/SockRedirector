@@ -35,11 +35,24 @@ jobs:
           # a pull request then we can checkout the head.
           fetch-depth: 2
 
-      - name Windows setup
+      - name: Windows msvc setup
         uses: ilammy/msvc-dev-cmd@v1.9.0
-          if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
+        
+      - name: Windows msbuild setup        
         uses: microsoft/setup-msbuild@v1
-          if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
 
       - name: Call maven
         run: mvn -B package --file pom.xml
+
+      - name: Commit files
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          dir D:\a\SockRedirector\SockRedirector\target\
+          mkdir D:\a\SockRedirector\SockRedirector\executable
+          copy D:\a\SockRedirector\SockRedirector\target\*.exe D:\a\SockRedirector\SockRedirector\executable
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "[Automated] Added build files"
