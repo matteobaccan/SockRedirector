@@ -1,2 +1,2 @@
 ## Output Files
-Windows executable
+This Windws executable is automaticall created with GraalVM and Launch4j

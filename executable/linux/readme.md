@@ -1,2 +1,3 @@
 ## Output Files
-Linux executable
+This Linux executable is automaticall created with GraalVM
+

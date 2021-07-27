@@ -1,2 +1,2 @@
 ## Output Files
-MACOs executable
+This MacOS executable is automaticall created with GraalVM
