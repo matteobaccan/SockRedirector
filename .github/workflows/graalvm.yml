@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      # all strategy push on repository, for this reason I need max 1 parallel processing
+      # git pull before push may be concurrent in concurrent processes
+      max-parallel: 1 
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
