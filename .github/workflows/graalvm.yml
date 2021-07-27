@@ -75,7 +75,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
-          git commit -m "[Automated] Added Msc build files"
+          git commit -m "[Automated] Added Mac build files"
           git pull
 
       - name: Push changes
