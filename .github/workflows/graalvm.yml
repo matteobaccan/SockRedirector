@@ -55,7 +55,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add *.exe
-          git commit -m "[Automated] Added windows build files"
+          git commit -m "[Automated] Added Windows build files"
           git pull 
 
       - name: Commit files
