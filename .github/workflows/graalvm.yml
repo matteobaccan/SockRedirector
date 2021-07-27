@@ -35,11 +35,13 @@ jobs:
           # a pull request then we can checkout the head.
           fetch-depth: 2
 
-      - name Windows setup
+      - name: Windows msvc
         uses: ilammy/msvc-dev-cmd@v1.5.0
-          if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
+        
+      - name: Windows msbuild
         uses: microsoft/setup-msbuild@v1
-          if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
 
       - name: Call maven
         run: mvn -B package --file pom.xml
