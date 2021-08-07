@@ -26,7 +26,7 @@ jobs:
           # Pattern to match files to be formatted
           #files: # optional, default is **/*.java
           # Set to true to not commit the changes
-          skipCommit: true # optional, default is false
+          skipCommit: false # optional, default is false
           # Version of Google Java Format to use
           #version: # optional
           # Recommended on MacOS machines
