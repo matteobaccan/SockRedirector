@@ -10,8 +10,8 @@ package it.baccan.sockredirector.util;
 
 /** @author Matteo Baccan */
 public enum SocketFlow {
-  /** Inbound data. */
-  INBOUND,
-  /** Outbound data. */
-  OUTBOUND
+    /** Inbound data. */
+    INBOUND,
+    /** Outbound data. */
+    OUTBOUND
 }
