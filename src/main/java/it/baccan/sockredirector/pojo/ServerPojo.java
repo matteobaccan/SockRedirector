@@ -10,24 +10,20 @@ package it.baccan.sockredirector.pojo;
 
 import lombok.Data;
 
-/**
- *
- * @author Matteo Baccan
- */
+/** @author Matteo Baccan */
 @Data
 public class ServerPojo {
 
-    private String sourceAddress;
-    private int sourcePort;
-    private String destinationAddress;
-    private int destinationPort;
-    private boolean logger;
-    private int timeout;
-    private int maxclient;
-    private int blockSize;
-    private long inReadWait;
-    private long inWriteWait;
-    private long outReadWait;
-    private long outWriteWait;
-
+  private String sourceAddress;
+  private int sourcePort;
+  private String destinationAddress;
+  private int destinationPort;
+  private boolean logger;
+  private int timeout;
+  private int maxclient;
+  private int blockSize;
+  private long inReadWait;
+  private long inWriteWait;
+  private long outReadWait;
+  private long outWriteWait;
 }
