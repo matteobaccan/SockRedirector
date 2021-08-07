@@ -22,7 +22,7 @@ jobs:
         uses: axel-op/googlejavaformat-action@v3.4.0
         with:
           # Arguments for the Google Java Format executable
-          #args: # optional, default is --replace
+          args: --replace --aosp # optional, default is --replace
           # Pattern to match files to be formatted
           #files: # optional, default is **/*.java
           # Set to true to not commit the changes
