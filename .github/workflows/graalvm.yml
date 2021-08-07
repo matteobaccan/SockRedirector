@@ -7,8 +7,35 @@ on:
     branches: [ master ]
 
 jobs:
+  reformat:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Google Java Format
+        # You may pin to the exact commit or the version.
+        # uses: axel-op/googlejavaformat-action@5045c8c244a22eb6a28eeb6050cc2baebd75c5f2
+        uses: axel-op/googlejavaformat-action@v3.4.0
+        with:
+          # Arguments for the Google Java Format executable
+          #args: # optional, default is --replace
+          # Pattern to match files to be formatted
+          #files: # optional, default is **/*.java
+          # Set to true to not commit the changes
+          skipCommit: true # optional, default is false
+          # Version of Google Java Format to use
+          #version: # optional
+          # Recommended on MacOS machines
+          #githubToken: # optional
+          # Commit message
+          #commitMessage: # optional, default is Google Java Format
 
   build:
+    needs: reformat
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
