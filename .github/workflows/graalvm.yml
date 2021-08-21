@@ -19,7 +19,7 @@ jobs:
       - name: Google Java Format
         # You may pin to the exact commit or the version.
         # uses: axel-op/googlejavaformat-action@5045c8c244a22eb6a28eeb6050cc2baebd75c5f2
-        uses: axel-op/googlejavaformat-action@v3.4.0
+        uses: axel-op/googlejavaformat-action@3.5.0
         with:
           # Arguments for the Google Java Format executable
           args: --replace --aosp # optional, default is --replace
