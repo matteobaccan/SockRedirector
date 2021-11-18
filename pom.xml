@@ -13,6 +13,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <!-- Allineare la versione con graalvm.yml -->
         <graalvm.version>21.2.0</graalvm.version>
+        <skipNativeVersion>true</skipNativeVersion>
     </properties>
 
     <dependencies>
@@ -133,7 +134,7 @@
                             <mainClass>it.baccan.sockredirector.SockRedirector</mainClass>
                             <buildArgs>--no-fallback --allow-incomplete-classpath</buildArgs>
                             <imageName>Sockredirector</imageName>
-                            <skip>false</skip>
+                            <skip>${skipNativeVersion}</skip>
                         </configuration>
                     </execution>
                 </executions>
