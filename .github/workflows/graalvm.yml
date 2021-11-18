@@ -96,7 +96,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           git commit -m "[Automated] Added Linux build files"
-          git config --global pull.ff only
+          #git config --global pull.ff only
           git pull
 
       - name: Commit files
@@ -107,7 +107,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           git commit -m "[Automated] Added Mac build files"
-          git config --global pull.ff only
+          #git config --global pull.ff only
           git pull
 
       - name: Push changes
