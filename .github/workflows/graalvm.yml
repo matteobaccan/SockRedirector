@@ -54,7 +54,7 @@ jobs:
       matrix:
         os: [windows-latest]
         #os: [ubuntu-latest, macos-latest, windows-latest]
-      max-parallel: 1
+      max-parallel: 1      
 
     if: github.ref == 'refs/heads/master'
     steps:
@@ -102,9 +102,9 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: release/windows/${{ jobs.releasedate.steps.read_release_date.outputs.RELEASE_BODY }}
+          tag: release/windows/${{ needs.steps.read_release_date.outputs.RELEASE_BODY }}
           file: D:\a\SockRedirector\SockRedirector\target\sockredirector.exe
-          file: D:\a\SockRedirector\SockRedirector\target\sockredirector-2.0.2.exe
+          #file: D:\a\SockRedirector\SockRedirector\target\sockredirector-2.0.2.exe
           asset_name: Sockredirector.exe
           body: |
             Windows release of ${{ jobs.releasedate.steps.read_release_date.outputs.RELEASE_BODY }}
