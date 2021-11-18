@@ -107,7 +107,7 @@ jobs:
           #file: D:\a\SockRedirector\SockRedirector\target\sockredirector-2.0.2.exe
           asset_name: Sockredirector.exe
           body: |
-            Windows release of ${{ jobs.releasedate.steps.read_release_date.outputs.RELEASE_BODY }}
+            Windows release of ${{ needs.steps.read_release_date.outputs.RELEASE_BODY }}
 
       - name: Create release date
         if: ${{ matrix.os == 'ubuntu-latest' }}
