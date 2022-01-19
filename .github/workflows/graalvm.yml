@@ -66,10 +66,10 @@ jobs:
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
         run: echo "$JOB_CONTEXT"
-      - name: Dump jobs context
-        env:
-          JOBS_CONTEXT: ${{ toJSON(jobs) }}
-        run: echo "$JOBS_CONTEXT"
+#      - name: Dump jobs context
+#        env:
+#          JOBS_CONTEXT: ${{ toJSON(jobs) }}
+#        run: echo "$JOBS_CONTEXT"
       - name: Dump steps context
         env:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
