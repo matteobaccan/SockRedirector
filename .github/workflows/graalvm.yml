@@ -118,13 +118,13 @@ jobs:
       - name: Call maven
         run: mvn --no-transfer-progress -B package --file pom.xml -DskipNativeVersion=false
 
-#      - name: Create release date
-#        if: ${{ matrix.os == 'windows-latest' }}
-#        id: read_release_win
-#        shell: bash
-#        run: |
-#          r=$(date "+%Y%m%d-%H%M%S")
-#          echo "::set-output name=RELEASE_BODY::$r"
+      - name: Create release date
+        if: ${{ matrix.os == 'windows-latest' }}
+        id: read_release_win
+        shell: bash
+        run: |
+          r=$(date "+%Y%m%d-%H%M%S")
+          echo "::set-output name=RELEASE_BODY::$r"
 
       - name: Upload Windows Binaries to Release
         if: ${{ matrix.os == 'windows-latest' }}
@@ -133,10 +133,10 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: release/windows/${{ needs.steps.read_release_date.outputs.RELEASE_BODY }}
           file: D:\a\SockRedirector\SockRedirector\target\sockredirector.exe
-          #file: D:\a\SockRedirector\SockRedirector\target\sockredirector-2.0.2.exe
+#         file: D:\a\SockRedirector\SockRedirector\target\sockredirector-2.0.2.exe
           asset_name: Sockredirector.exe
           body: |
-            Windows release of ${{ needs.steps.read_release_date.outputs.RELEASE_BODY }}
+            Windows release of ${{ needs.steps.read_release_win.outputs.RELEASE_BODY }}
 
       - name: Create release date
         if: ${{ matrix.os == 'ubuntu-latest' }}
