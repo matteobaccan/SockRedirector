@@ -176,6 +176,8 @@ jobs:
           body: |
             MacOS release of ${{ steps.read_release_mac.outputs.RELEASE_BODY }}
 
+      - name: Adding markdown
+        run: echo '### Summary' >> $GITHUB_STEP_SUMMARY
 
 
 #     - name: Commit files
