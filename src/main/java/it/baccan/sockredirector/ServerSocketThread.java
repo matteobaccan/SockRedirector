@@ -33,7 +33,7 @@ public class ServerSocketThread extends Thread {
     private FlowThread destinationOutputToSourceInputThread;
 
     /**
-     * Current htread number.
+     * Current thread number.
      *
      * @return
      */
@@ -140,7 +140,7 @@ public class ServerSocketThread extends Thread {
                     threadNumber,
                     getServerPojo().getDestinationAddress(),
                     getServerPojo().getDestinationPort());
-            LOG.error("Unknow error", e);
+            LOG.error("Unknown error", e);
         } finally {
             try {
                 socketIn.close();

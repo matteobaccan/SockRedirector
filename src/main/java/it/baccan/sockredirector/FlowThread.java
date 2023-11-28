@@ -136,7 +136,7 @@ public class FlowThread extends Thread {
                     bytesToRead = sourceInputStream.available();
                 }
 
-                // Write bytes if there arent new bytes to read or buffer is full
+                // Write bytes if there are not new bytes to read or buffer is full
                 if (bufferPosition >= size || bytesToRead == 0) {
                     socketPause(getWritePause());
                     logData(logFile, buffer, bufferPosition);
