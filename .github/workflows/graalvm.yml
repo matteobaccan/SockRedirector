@@ -73,7 +73,6 @@ jobs:
         shell: bash
         run: |
           r=$(date "+%Y%m%d-%H%M%S")
-          #echo "::set-output name=RELEASE_BODY::$r"
           echo "RELEASE_BODY=$r" >> $GITHUB_OUTPUT
 
       - name: Create release date
@@ -84,16 +83,16 @@ jobs:
           dir
           Get-ChildItem -Path *.dll, sockredirector.exe | Compress-Archive -DestinationPath SockRedirector.zip
 
-      - name: Upload Windows Binaries to Release
-        if: ${{ matrix.os == 'windows-latest' }}
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: release/windows/${{ steps.read_release_win.outputs.RELEASE_BODY }}
-          file: target/SockRedirector.zip
-          asset_name: SockRedirector-win32.zip
-          body: |
-            Rilascio Windows del ${{ steps.read_release_win.outputs.RELEASE_BODY }}
+#      - name: Upload Windows Binaries to Release
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        uses: svenstaro/upload-release-action@v2
+#        with:
+#          repo_token: ${{ secrets.GITHUB_TOKEN }}
+#          tag: release/windows/${{ steps.read_release_win.outputs.RELEASE_BODY }}
+#          file: target/SockRedirector.zip
+#          asset_name: SockRedirector-win32.zip
+#          body: |
+#            Rilascio Windows del ${{ steps.read_release_win.outputs.RELEASE_BODY }}
 
       - name: Create release date
         if: ${{ matrix.os == 'ubuntu-latest' }}
