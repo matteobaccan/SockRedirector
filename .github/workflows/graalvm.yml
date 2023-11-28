@@ -105,7 +105,7 @@ jobs:
           echo "RELEASE_BODY=$r" >> $GITHUB_OUTPUT
           cd target
           ls
-          zip SockRedirector.zip sockredirector *.so
+          zip SockRedirector.zip Sockredirector *.so
 
 #      - name: Upload Linux Binaries to Release
 #        if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -128,7 +128,7 @@ jobs:
           echo "RELEASE_BODY=$r" >> $GITHUB_OUTPUT
           cd target
           ls
-          zip SockRedirector.zip sockredirector *.so
+          zip SockRedirector.zip Sockredirector *.so
 
 #      - name: Upload Mac Binaries to Release
 #        if: ${{ matrix.os == 'macos-latest' }}
