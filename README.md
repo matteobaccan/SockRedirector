@@ -68,9 +68,3 @@ Ini file is divided in several section For each section you can define these par
    <outWriteWait>1000</outWriteWait>
 </redirection>
 ```
-## Update
-### 1.00
-First public release
-
-### 2.00
-Some optimization and a new build
