@@ -1,33 +1,29 @@
 /*
  * Copyright (c) 2019 Matteo Baccan
- * http://www.baccan.it
+ * https://www.baccan.it
  *
  * Distributed under the GPL v3 software license, see the accompanying
- * file LICENSE or http://www.gnu.org/licenses/gpl.html.
+ * file LICENSE or https://www.gnu.org/licenses/gpl-3.0.html.
  *
  */
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * PortRedirect engine.
  *
  * @author Matteo Baccan
  */
+@Slf4j
 public class PortRedirect extends Thread {
-
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(PortRedirect.class);
 
     private final ServerPojo serverPojo;
 
@@ -40,7 +36,7 @@ public class PortRedirect extends Thread {
         super();
         setName("PortRedirect");
         serverPojo = server;
-        LOG.info(
+        log.info(
                 "Ready on [{}:{}] -> [{}:{}] TIMEOUT [{}]",
                 serverPojo.getSourceAddress(),
                 serverPojo.getSourcePort(),
@@ -49,10 +45,13 @@ public class PortRedirect extends Thread {
                 serverPojo.getTimeout());
     }
 
+    /**
+     * Execute port redirect thread.
+     */
     @Override
     public final void run() {
-        try (ServerSocket sock =
-                new ServerSocket(
+        try (ServerSocket sock
+                = new ServerSocket(
                         serverPojo.getSourcePort(),
                         serverPojo.getMaxclient(),
                         InetAddress.getByName(serverPojo.getSourceAddress()))) {
@@ -69,18 +68,18 @@ public class PortRedirect extends Thread {
                 thread.start();
             }
         } catch (BindException bind) {
-            LOG.error(
+            log.error(
                     "Address [{}:{}] already in use : [{}]",
                     serverPojo.getSourceAddress(),
                     serverPojo.getSourcePort(),
                     bind.getMessage());
         } catch (IOException e) {
-            LOG.error(
+            log.error(
                     "Error in redirector from [{}] \t to [{}:{}]",
                     serverPojo.getSourcePort(),
                     serverPojo.getDestinationAddress(),
                     serverPojo.getDestinationPort());
-            LOG.error("Full error", e);
+            log.error("Full error", e);
         }
     }
 }

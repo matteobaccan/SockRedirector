@@ -49,6 +49,7 @@ Ini file is divided in several section For each section you can define these par
 | inWriteWait | long | 0 | writing to destination pause |
 | outReadWait | long | 0 | reading from source pause |
 | outWriteWait | long | 0 | write to source pause |
+| randomKill | long | 0 | random kill of thread within N seconds |
 
 ## Example
 ### Configuration Example (sockRedirector.ini)

@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 Matteo Baccan
- * http://www.baccan.it
+ * https://www.baccan.it
  *
  * Distributed under the GPL v3 software license, see the accompanying
- * file LICENSE or http://www.gnu.org/licenses/gpl.html.
+ * file LICENSE or https://www.gnu.org/licenses/gpl-3.0.html.
  *
  */
 package it.baccan.sockredirector;
@@ -11,35 +11,30 @@ package it.baccan.sockredirector;
 import it.baccan.sockredirector.pojo.ServerPojo;
 import it.baccan.sockredirector.util.SocketFlow;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
-/** @author Matteo Baccan */
+/**
+ * @author Matteo Baccan
+ */
+@Slf4j
 public class ServerSocketThread extends Thread {
 
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(ServerSocketThread.class);
-    /** */
     private static final AtomicLong THREADTOTAL = new AtomicLong(0);
 
+    @Getter
     private long threadNumber = 0;
+    @Getter
     private final ServerPojo serverPojo;
     private final Socket socketIn;
+    @Getter
     private FlowThread sourceOutputToDestinationInputThread;
+    @Getter
     private FlowThread destinationOutputToSourceInputThread;
-
-    /**
-     * Current thread number.
-     *
-     * @return
-     */
-    public long getThreadNumber() {
-        return threadNumber;
-    }
 
     /**
      * @param sock
@@ -51,56 +46,48 @@ public class ServerSocketThread extends Thread {
         threadNumber = THREADTOTAL.incrementAndGet();
         setName(
                 "FROM:"
-                        + serverPojo.getSourcePort()
-                        + "|TO:"
-                        + serverPojo.getDestinationAddress()
-                        + ":"
-                        + serverPojo.getDestinationPort()
-                        + "|NUM:"
-                        + threadNumber);
+                + serverPojo.getSourcePort()
+                + "|TO:"
+                + serverPojo.getDestinationAddress()
+                + ":"
+                + serverPojo.getDestinationPort());
     }
 
-    /** Interrupt the two subthreads. */
+    /**
+     * Interrupt the two subthreads.
+     */
     public synchronized void killProcess() {
-        try {
-            sourceOutputToDestinationInputThread.interrupt();
-        } catch (ThreadDeath td) {
-            LOG.error("ThreadDeath on killProcess [{}]", td.getMessage());
-        } catch (Throwable e) {
-            LOG.error("Throwable", e);
-        }
-
-        try {
-            destinationOutputToSourceInputThread.interrupt();
-        } catch (ThreadDeath td) {
-            LOG.error("ThreadDeath on killProcess [{}]", td.getMessage());
-        } catch (Throwable e) {
-            LOG.error("Throwable", e);
-        }
+        log.info("Kill source thread [{}] from thread [{}]", sourceOutputToDestinationInputThread.getId(), this.getId());
+        sourceOutputToDestinationInputThread.stopThread();
+        log.info("Kill destination thread [{}] from thread [{}]", destinationOutputToSourceInputThread.getId(), this.getId());
+        destinationOutputToSourceInputThread.stopThread();
     }
 
+    /**
+     * Run socket server.
+     */
     @Override
     public void run() {
         if (getServerPojo().isLogger()) {
-            LOG.info("[{}] new user [{}]", threadNumber, socketIn);
+            log.info("new thread [{}] on connection  [{}]", threadNumber, socketIn);
         }
 
-        try (Socket socketOut =
-                new Socket(
+        try (Socket socketOut
+                = new Socket(
                         getServerPojo().getDestinationAddress(),
                         getServerPojo().getDestinationPort())) {
 
             // S -> D
-            sourceOutputToDestinationInputThread =
-                    new FlowThread(
+            sourceOutputToDestinationInputThread
+                    = new FlowThread(
                             this,
                             socketIn.getOutputStream(),
                             socketOut.getInputStream(),
                             getServerPojo().getDestinationAddress()
-                                    + "-"
-                                    + getServerPojo().getDestinationPort()
-                                    + ".in"
-                                    + threadNumber,
+                            + "-"
+                            + getServerPojo().getDestinationPort()
+                            + ".in"
+                            + threadNumber,
                             getServerPojo().isLogger(),
                             getServerPojo().getBlockSize(),
                             SocketFlow.OUTBOUND,
@@ -108,17 +95,19 @@ public class ServerSocketThread extends Thread {
                             getServerPojo().getOutWriteWait());
             sourceOutputToDestinationInputThread.start();
 
+            log.info("Start source thread [{}] from thread [{}]", sourceOutputToDestinationInputThread.getId(), this.getId());
+
             // D -> S
-            destinationOutputToSourceInputThread =
-                    new FlowThread(
+            destinationOutputToSourceInputThread
+                    = new FlowThread(
                             this,
                             socketOut.getOutputStream(),
                             socketIn.getInputStream(),
                             getServerPojo().getDestinationAddress()
-                                    + "-"
-                                    + getServerPojo().getDestinationPort()
-                                    + ".out"
-                                    + threadNumber,
+                            + "-"
+                            + getServerPojo().getDestinationPort()
+                            + ".out"
+                            + threadNumber,
                             getServerPojo().isLogger(),
                             getServerPojo().getBlockSize(),
                             SocketFlow.INBOUND,
@@ -126,36 +115,45 @@ public class ServerSocketThread extends Thread {
                             getServerPojo().getInWriteWait());
             destinationOutputToSourceInputThread.start();
 
+            log.info("Start destination thread [{}] from thread [{}]", destinationOutputToSourceInputThread.getId(), this.getId());
+
             while (destinationOutputToSourceInputThread.isAlive()
                     && sourceOutputToDestinationInputThread.isAlive()) {
                 sleep(1000);
+                // Proviamo a killare in modo random il thread
+                if (getServerPojo().getRandomKill() > 0) {
+                    var random = new Random();
+                    if (random.nextInt() % getServerPojo().getRandomKill() == 0) {
+                        log.info("Kill random of thread [{}]", this.getId());
+                        killProcess();
+                    }
+                }
             }
 
         } catch (InterruptedException e) {
-            LOG.info("InterruptedException [{}]", e.getMessage());
+            log.info("InterruptedException [{}]", e.getMessage());
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            LOG.error(
+            log.error(
                     "[{}] host:port [{}:{}]",
                     threadNumber,
                     getServerPojo().getDestinationAddress(),
                     getServerPojo().getDestinationPort());
-            LOG.error("Unknown error", e);
+            log.error("Unknown error", e);
         } finally {
+            // Kill all sub process when one thread exit
+            killProcess();
+
             try {
                 socketIn.close();
             } catch (IOException e) {
-                LOG.error("Error on socket.close", e);
+                log.error("Error on socket.close", e);
             }
         }
 
         if (getServerPojo().isLogger()) {
-            LOG.info("[{}] disconnect", threadNumber);
+            log.info("end thread [{}] on connection  [{}]", threadNumber, socketIn);
         }
     }
 
-    /** @return the serverPojo */
-    public ServerPojo getServerPojo() {
-        return serverPojo;
-    }
 }

@@ -1,23 +1,19 @@
 /*
  * Copyright (c) 2019 Matteo Baccan
- * http://www.baccan.it
+ * https://www.baccan.it
  *
  * Distributed under the GPL v3 software license, see the accompanying
- * file LICENSE or http://www.gnu.org/licenses/gpl.html.
+ * file LICENSE or https://www.gnu.org/licenses/gpl-3.0.html.
  *
  */
 package it.baccan.sockredirector;
-
-import it.baccan.sockredirector.util.SocketFlow;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Admin thread.
@@ -25,26 +21,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Matteo Baccan
  * @version 1.0
  */
+@Slf4j
 public class AdminThread extends Thread {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AdminThread.class);
-
-    /** Admin thread constructor. */
+    /**
+     * Admin thread constructor.
+     */
     public AdminThread() {
         super();
         setName("AdminThread");
     }
 
+    /**
+     * Run admin thread.
+     */
     @Override
     public final void run() {
         try {
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            var input = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 String line = input.readLine();
 
                 if (!line.isEmpty()) {
-                    LOG.info("Admin> [{}]", line);
+                    log.info("Admin> [{}]", line);
                 }
 
                 line = line.trim();
@@ -61,34 +61,34 @@ public class AdminThread extends Thread {
                 }
 
                 if (command.equalsIgnoreCase("help")) {
-                    LOG.info("");
-                    LOG.info("help                      - this help");
-                    LOG.info("exit                      - exit program");
-                    LOG.info("thread [filter]           - thread list");
-                    LOG.info("kill <nth> [... [<nth>]]  - kill nth thread");
-                    LOG.info("pause <nth> <readPause> <writePause> - set pause on nth thread");
-                    LOG.info("");
+                    log.info("");
+                    log.info("help                      - this help");
+                    log.info("exit                      - exit program");
+                    log.info("thread [filter]           - thread list");
+                    log.info("kill <nth> [... [<nth>]]  - kill nth thread");
+                    log.info("pause <nth> <readPause> <writePause> - set pause on nth thread");
+                    log.info("");
                 } else if (command.equalsIgnoreCase("exit")) {
                     Runtime.getRuntime().halt(0);
                 } else if (command.equalsIgnoreCase("thread")) {
-                    LOG.info("");
+                    log.info("");
                     dumpThread(parameter);
-                    LOG.info("");
+                    log.info("");
                 } else if (command.equalsIgnoreCase("pause")) {
-                    LOG.info("");
+                    log.info("");
                     pauseThread(parameter);
-                    LOG.info("");
+                    log.info("");
                 } else if (command.equalsIgnoreCase("kill")) {
-                    LOG.info("");
+                    log.info("");
                     String[] th = parameter.split(" ");
                     for (String t : th) {
                         kill(t);
                     }
-                    LOG.info("");
+                    log.info("");
                 }
             }
         } catch (IOException e) {
-            LOG.error("adminThread error", e);
+            log.error("adminThread error", e);
         }
     }
 
@@ -100,10 +100,10 @@ public class AdminThread extends Thread {
                     String info = getThreadInfo(thread);
                     // If is in filter and the tread is not System
                     if ((filter.isEmpty() || info.contains(filter))
-                            && (thread.getThreadGroup() != null
-                                    && !"system".equals(thread.getThreadGroup().getName()))
-                            && info.length() > 0) {
-                        LOG.info(info);
+                    && (thread.getThreadGroup() != null
+                    && !"system".equals(thread.getThreadGroup().getName()))
+                    && info.length() > 0) {
+                        log.info(info);
                     }
                 });
     }
@@ -119,7 +119,6 @@ public class AdminThread extends Thread {
                         if (thread instanceof FlowThread) {
                             FlowThread flowThread = (FlowThread) thread;
 
-                            String info = getThreadInfo(thread);
                             // If is in filter and the tread is not System
                             if ((th[0].isEmpty() || ("" + thread.getId()).equals(th[0]))) {
 
@@ -128,14 +127,14 @@ public class AdminThread extends Thread {
                                         flowThread.setReadPause(Long.parseLong(th[1]));
                                     }
                                 } catch (NumberFormatException numberFormatException) {
-                                    LOG.error("Wrong number [{}]", th[1]);
+                                    log.error("Wrong number [{}]", th[1]);
                                 }
                                 try {
                                     if (th.length > 2) {
                                         flowThread.setWritePause(Long.parseLong(th[2]));
                                     }
                                 } catch (NumberFormatException numberFormatException) {
-                                    LOG.error("Wrong number [{}]", th[2]);
+                                    log.error("Wrong number [{}]", th[2]);
                                 }
                             }
                         }
@@ -152,83 +151,57 @@ public class AdminThread extends Thread {
                     try {
                         if (cThread.equals("" + thread.getId())) {
                             bKill.set(true);
-                            LOG.info("Try to kill ID[{}]", cThread);
+                            log.info("Try to kill ID[{}]", cThread);
                             thread.interrupt();
-                            LOG.info("Thread killed");
+                            log.info("Thread killed");
                         }
                     } catch (ThreadDeath td) {
-                        LOG.error("ThreadDeath on admin kill [{}]", td.getMessage());
+                        log.error("ThreadDeath on admin kill [{}]", td.getMessage());
                     } catch (Exception exception) {
-                        LOG.error("Exception on admin kill", exception);
+                        log.error("Exception on admin kill", exception);
                     }
                 });
 
         if (!bKill.get()) {
-            LOG.info("Thread not found");
+            log.info("Thread not found");
         }
     }
 
     private String getThreadInfo(final Thread thread) {
         StringBuilder sb = new StringBuilder(128);
         try {
-            if (thread instanceof FlowThread) {
-                FlowThread flowThread = (FlowThread) thread;
+            if (thread instanceof ServerSocketThread) {
+                ServerSocketThread serverSocketThread = (ServerSocketThread) thread;
 
-                sb.append(
-                        padRight(
-                                flowThread.getParentSockThread().getServerPojo().getSourceAddress(),
-                                15));
-                sb.append("|");
-                sb.append(
-                        padRight(
-                                ""
-                                        + flowThread
-                                                .getParentSockThread()
-                                                .getServerPojo()
-                                                .getSourcePort(),
-                                5));
-                sb.append("|");
-                if (flowThread.getSocketFlow() == SocketFlow.OUTBOUND) {
-                    sb.append("->");
-                } else {
-                    sb.append("<-");
-                }
-                sb.append("|");
-                sb.append(padRight(flowThread.getSocketFlow().name(), 20));
-                sb.append("|");
-                sb.append(padRight("" + flowThread.getReadPause(), 5));
-                sb.append("|");
-                sb.append(padRight("" + flowThread.getWritePause(), 5));
-                sb.append("|");
+                sb.append("|ID ");
                 sb.append(String.format("%1$5d", thread.getId()));
                 sb.append("|");
-                sb.append(padRight(thread.getClass().getSimpleName(), 20));
-                /*
+
+                sb.append(padRight(serverSocketThread.getServerPojo().getSourceAddress() + ":" + serverSocketThread.getServerPojo().getSourcePort(), 30));
+                sb.append("|ID ");
+                sb.append(String.format("%1$5d", serverSocketThread.getSourceOutputToDestinationInputThread().getId()));
                 sb.append("|");
-                sb.append(padRight(thread.getState().name(), 10));
+                sb.append(serverSocketThread.getSourceOutputToDestinationInputThread().getSocketFlow().name());
+                sb.append("|R PAUSE ");
+                sb.append(padRight("" + serverSocketThread.getSourceOutputToDestinationInputThread().getReadPause(), 5));
+                sb.append("|W PAUSE ");
+                sb.append(padRight("" + serverSocketThread.getSourceOutputToDestinationInputThread().getWritePause(), 5));
                 sb.append("|");
-                sb.append(padRight("" + thread.getPriority(), 10));
-                 */
-                /*
-                ThreadGroup threadGroup = thread.getThreadGroup();
-                if (threadGroup != null) {
-                    sb.append(" GROUP[").append(threadGroup.getName()).append("]");
-                }
-                if (thread.isDaemon()) {
-                    sb.append(" [daemon]");
-                }
-                if (thread.isAlive()) {
-                    sb.append(" [alive]");
-                }
-                if (thread.isInterrupted()) {
-                    sb.append(" [interrupted]");
-                }
-                 */
+                sb.append(padRight(thread.getName(), 20));
+
+                sb.append("|-|");
+                sb.append(serverSocketThread.getDestinationOutputToSourceInputThread().getSocketFlow().name());
+                sb.append("|ID ");
+                sb.append(String.format("%1$5d", serverSocketThread.getDestinationOutputToSourceInputThread().getId()));
+                sb.append("|R PAUSE ");
+                sb.append(padRight("" + serverSocketThread.getDestinationOutputToSourceInputThread().getReadPause(), 5));
+                sb.append("|W PAUSE ");
+                sb.append(padRight("" + serverSocketThread.getDestinationOutputToSourceInputThread().getWritePause(), 5));
                 sb.append("|");
                 sb.append(padRight(thread.getName(), 20));
             }
         } catch (Exception exception) {
-            LOG.error("getThreadInfo error", exception);
+            log.error("getThreadInfo error", exception);
         }
         return sb.toString();
     }

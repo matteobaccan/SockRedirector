@@ -1,53 +1,53 @@
 /*
  * Copyright (c) 2019 Matteo Baccan
- * http://www.baccan.it
+ * https://www.baccan.it
  *
  * Distributed under the GPL v3 software license, see the accompanying
- * file LICENSE or http://www.gnu.org/licenses/gpl.html.
+ * file LICENSE or https://www.gnu.org/licenses/gpl-3.0.html.
  *
  */
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.pojo.ServerPojo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Sock redirector server.
  *
  * @author Matteo Baccan
  */
+@Slf4j
 public class SockRedirector extends Thread {
 
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(SockRedirector.class);
-
-    /** @param argv Command line parameters. */
+    /**
+     * @param argv Command line parameters.
+     */
     public static void main(final String[] argv) {
         SockRedirector sockRedirector = new SockRedirector();
         sockRedirector.init();
     }
 
-    /** Init program. */
+    /**
+     * Init program.
+     */
     public void init() {
         final String initFile = "sockRedirector.ini";
 
         System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8");
         System.setProperty("sun.net.spi.nameservice.provider.1", "dns,sun");
 
-        LOG.info("+---------------------------------------------------------------------------+");
-        LOG.info("| TCP/IP Port Redirector                                                    |");
-        LOG.info("| Matteo Baccan Opensource Software                    http://www.baccan.it |");
-        LOG.info("+---------------------------------------------------------------------------+");
-        LOG.info("");
+        log.info("+---------------------------------------------------------------------------+");
+        log.info("| TCP/IP Port Redirector                                                    |");
+        log.info("| Matteo Baccan Opensource Software                   https://www.baccan.it |");
+        log.info("+---------------------------------------------------------------------------+");
+        log.info("");
 
-        LOG.info("Setup environment");
+        log.info("Setup environment");
         // Se non ho la directory di LOG la creo
         try {
             File oFile = new File("logs");
@@ -55,10 +55,10 @@ public class SockRedirector extends Thread {
                 oFile.mkdir();
             }
         } catch (Throwable e) {
-            LOG.error("Error creating log directory", e);
+            log.error("Error creating log directory", e);
         }
 
-        LOG.info("Opening [{}] ...", initFile);
+        log.info("Opening [{}] ...", initFile);
         try {
             byte[] buffer;
             File config = new File(initFile);
@@ -97,6 +97,7 @@ public class SockRedirector extends Thread {
                     serverPojo.setInWriteWait(Long.parseLong(getToken(cXML, "inWriteWait", "0")));
                     serverPojo.setOutReadWait(Long.parseLong(getToken(cXML, "outReadWait", "0")));
                     serverPojo.setOutWriteWait(Long.parseLong(getToken(cXML, "outWriteWait", "0")));
+                    serverPojo.setRandomKill(Long.parseLong(getToken(cXML, "randomKill", "0")));
 
                     // Start server
                     PortRedirect server = new PortRedirect(serverPojo);
@@ -110,15 +111,15 @@ public class SockRedirector extends Thread {
                 // Start admin
                 admin.start();
 
-                LOG.info("");
-                LOG.info("All system ready. Type \"help\" for debug info");
+                log.info("");
+                log.info("All system ready. Type \"help\" for debug info");
             } else {
-                LOG.error("Missing configuration file [{}]", config.getAbsolutePath());
+                log.error("Missing configuration file [{}]", config.getAbsolutePath());
             }
 
         } catch (IOException e) {
-            LOG.error("Error during opening of [{}]", initFile);
-            LOG.error("IOException", e);
+            log.error("Error during opening of [{}]", initFile);
+            log.error("IOException", e);
         }
     }
 

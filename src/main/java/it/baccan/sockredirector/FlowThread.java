@@ -1,17 +1,14 @@
 /*
  * Copyright (charRead) 2019 Matteo Baccan
- * http://www.baccan.it
+ * https://www.baccan.it
  *
  * Distributed under the GPL v3 software license, see the accompanying
- * file LICENSE or http://www.gnu.org/licenses/gpl.html.
+ * file LICENSE or https://www.gnu.org/licenses/gpl-3.0.html.
  *
  */
 package it.baccan.sockredirector;
 
 import it.baccan.sockredirector.util.SocketFlow;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +16,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.SocketException;
+import lombok.extern.slf4j.Slf4j;
 
-/** @author Matteo Baccan */
+/**
+ * @author Matteo Baccan
+ */
+@Slf4j
 public class FlowThread extends Thread {
 
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(FlowThread.class);
-
+    private boolean exitThread = false;
     private final OutputStream sourceOutputStream;
     private final InputStream sourceInputStream;
     private final ServerSocketThread parentSockThread;
@@ -71,13 +70,17 @@ public class FlowThread extends Thread {
         setName(outputFileLog);
     }
 
+    /**
+     * Execute socket Thread.
+     */
     @Override
     public void run() {
+        log.info("Ini run thread [{}]", this.getId());
         // Attivo il sourceOutputToDestinationInputThread
         runNormal();
 
         // Distruggo tutti i processi
-        getParentSockThread().killProcess();
+        log.info("End run thread [{}]", this.getId());
     }
 
     private void runNormal() {
@@ -94,7 +97,7 @@ public class FlowThread extends Thread {
             int bytesToRead = -1;
             int charRead;
             boolean firstPause = true;
-            while (true) {
+            while (!exitThread) {
                 if (firstPause) {
                     firstPause = false;
                     socketPause(getReadPause());
@@ -108,12 +111,12 @@ public class FlowThread extends Thread {
                 } catch (SocketException se) {
                     if ("Socket closed".equals(se.getMessage())) {
                         // Chiusura della connessione
-                        LOG.info(
+                        log.info(
                                 "[{}][{}] Socket closed",
                                 getSocketFlow().name(),
                                 getParentSockThread().getThreadNumber());
                     } else {
-                        LOG.error(
+                        log.error(
                                 "[{}][{}] SocketException [{}]",
                                 getSocketFlow().name(),
                                 getParentSockThread().getThreadNumber(),
@@ -121,7 +124,7 @@ public class FlowThread extends Thread {
                     }
                     break;
                 } catch (IOException e) {
-                    LOG.error(
+                    log.error(
                             "[{}][{}] readError [{}]",
                             getSocketFlow().name(),
                             getParentSockThread().getThreadNumber(),
@@ -150,13 +153,13 @@ public class FlowThread extends Thread {
             socketPause(getWritePause());
             logData(logFile, buffer, bufferPosition);
         } catch (ThreadDeath td) {
-            LOG.error(
+            log.error(
                     "[{}][{}] ThreadDeath on runNormal [{}]",
                     getSocketFlow().name(),
                     getParentSockThread().getThreadNumber(),
                     td.getMessage());
         } catch (IOException e) {
-            LOG.error(
+            log.error(
                     "[{}][{}] Error on runNormal [{}]",
                     getSocketFlow().name(),
                     getParentSockThread().getThreadNumber(),
@@ -166,7 +169,7 @@ public class FlowThread extends Thread {
                 try {
                     logFile.close();
                 } catch (IOException iOException) {
-                    LOG.error(
+                    log.error(
                             "[{}][{}] Error on closing log file [{}]",
                             getSocketFlow().name(),
                             getParentSockThread().getThreadNumber(),
@@ -186,32 +189,44 @@ public class FlowThread extends Thread {
         }
     }
 
-    /** @return the readPause */
+    /**
+     * @return the readPause
+     */
     public long getReadPause() {
         return readPause;
     }
 
-    /** @param readPause the readPause to set */
+    /**
+     * @param readPause the readPause to set
+     */
     public void setReadPause(long readPause) {
         this.readPause = readPause;
     }
 
-    /** @return the writePause */
+    /**
+     * @return the writePause
+     */
     public long getWritePause() {
         return writePause;
     }
 
-    /** @param writePause the writePause to set */
+    /**
+     * @param writePause the writePause to set
+     */
     public void setWritePause(long writePause) {
         this.writePause = writePause;
     }
 
-    /** @return the parentSockThread */
+    /**
+     * @return the parentSockThread
+     */
     public ServerSocketThread getParentSockThread() {
         return parentSockThread;
     }
 
-    /** @return the socketFlow */
+    /**
+     * @return the socketFlow
+     */
     public SocketFlow getSocketFlow() {
         return socketFlow;
     }
@@ -222,6 +237,19 @@ public class FlowThread extends Thread {
         sourceOutputStream.write(buffer, 0, bufferPosition);
         if (logFile != null) {
             logFile.write(buffer, 0, bufferPosition);
+        }
+    }
+
+    /**
+     * Stop current thread.
+     */
+    public void stopThread() {
+        log.info("Exit from thread [{}]", this.getId());
+        exitThread = true;
+        try {
+            sourceInputStream.close();
+        } catch (IOException ex) {
+            log.error("stopThread close socket [{}]", ex.getMessage());
         }
     }
 }

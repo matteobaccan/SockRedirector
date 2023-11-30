@@ -1,6 +1,6 @@
 {
-  "extends": [
-    "config:base"
-  ],
-  "ignoreDeps": ["org.graalvm.sdk"]
+    "extends": [
+        "config:base"
+    ],
+    "ignoreDeps": ["org.graalvm.sdk"]
 }
