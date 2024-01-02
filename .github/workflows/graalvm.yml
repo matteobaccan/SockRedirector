@@ -33,7 +33,7 @@ jobs:
           # Set $JAVA_HOME to the GraalVM installation. Default: true.
           # set-java-home: # optional, default is true
           # Name of the build platform to cache dependencies. It can be "maven", "gradle", or "sbt".
-          cache: "maven"
+          # cache: "maven"
           # Annotate jobs with update notifications, for example, when a new GraalVM release is available
           # check-for-updates: # optional, default is true
           # Set up musl for static image building with GraalVM Native Image.
