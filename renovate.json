@@ -1,6 +1,10 @@
 {
-    "extends": [
-        "config:base"
-    ],
-    "ignoreDeps": ["org.graalvm.sdk"]
+ "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+ "extends": ["config:recommended"],
+ "packageRules": [
+     {
+       "matchUpdateTypes": ["minor", "patch"],
+       "automerge": true
+  }
+ ]
 }
