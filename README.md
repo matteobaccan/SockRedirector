@@ -69,3 +69,6 @@ Ini file is divided in several section For each section you can define these par
    <outWriteWait>1000</outWriteWait>
 </redirection>
 ```
+## QUESTIONS AND DOCUMENTATION
+
+For interact with the **SockRedirector Documentation**, visit [Deep Wiki](https://deepwiki.com/matteobaccan/SockRedirector).
