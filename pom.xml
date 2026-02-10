@@ -37,13 +37,13 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.28</version>
+            <version>1.5.29</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.5.28</version>
+            <version>1.5.29</version>
         </dependency>
         <!-- Logger -->
         <dependency>
