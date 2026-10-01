@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FlowThread extends Thread {
 
-    private boolean exitThread = false;
+    private volatile boolean exitThread = false;
     private final OutputStream sourceOutputStream;
     private final InputStream sourceInputStream;
     private final ServerSocketThread parentSockThread;

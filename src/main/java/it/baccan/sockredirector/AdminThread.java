@@ -43,6 +43,12 @@ public class AdminThread extends Thread {
             while (true) {
                 String line = input.readLine();
 
+                // stdin closed (e.g. running in background): stop admin console
+                if (line == null) {
+                    log.info("Admin console closed");
+                    return;
+                }
+
                 if (!line.isEmpty()) {
                     log.info("Admin> [{}]", line);
                 }

@@ -57,10 +57,15 @@ public class ServerSocketThread extends Thread {
      * Interrupt the two subthreads.
      */
     public synchronized void killProcess() {
-        log.info("Kill source thread [{}] from thread [{}]", sourceOutputToDestinationInputThread.getId(), this.getId());
-        sourceOutputToDestinationInputThread.stopThread();
-        log.info("Kill destination thread [{}] from thread [{}]", destinationOutputToSourceInputThread.getId(), this.getId());
-        destinationOutputToSourceInputThread.stopThread();
+        // Flow threads are null if the destination connection failed
+        if (sourceOutputToDestinationInputThread != null) {
+            log.info("Kill source thread [{}] from thread [{}]", sourceOutputToDestinationInputThread.getId(), this.getId());
+            sourceOutputToDestinationInputThread.stopThread();
+        }
+        if (destinationOutputToSourceInputThread != null) {
+            log.info("Kill destination thread [{}] from thread [{}]", destinationOutputToSourceInputThread.getId(), this.getId());
+            destinationOutputToSourceInputThread.stopThread();
+        }
     }
 
     /**
