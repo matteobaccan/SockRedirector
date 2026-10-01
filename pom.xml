@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>it.baccan</groupId>
     <artifactId>SockRedirector</artifactId>
-    <version>2.0.4</version>
+    <version>2.0.5</version>
     <packaging>jar</packaging>
     <name>SockRedirector ${project.version}</name>
 
@@ -11,7 +11,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Allineare la versione con graalvm.yml -->
         <graalvm.version>25.4.4.1.1</graalvm.version>
-        <native-image-maven-plugin.version>21.2.0</native-image-maven-plugin.version>
+        <native-maven-plugin.version>1.1.14</native-maven-plugin.version>
+        <lombok.version>1.18.48</lombok.version>
         <skipNativeVersion>true</skipNativeVersion>
         <maven.compiler.release>11</maven.compiler.release>
     </properties>
@@ -20,7 +21,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.48</version>
+            <version>${lombok.version}</version>
         </dependency>
 
         <!-- Logger -->
@@ -37,13 +38,13 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.6.4</version>
+            <version>1.6.5</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.6.4</version>
+            <version>1.6.5</version>
         </dependency>
         <!-- Logger -->
         <dependency>
@@ -65,6 +66,14 @@
                 <configuration>
                     <showDeprecation>true</showDeprecation>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    <!-- From JDK 23 annotation processing must be explicitly enabled -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -98,6 +107,7 @@
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <minimizeJar>true</minimizeJar>
                     <archive>
@@ -121,23 +131,27 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.graalvm.nativeimage</groupId>
-                <artifactId>native-image-maven-plugin</artifactId>
-                <version>${native-image-maven-plugin.version}</version>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native-maven-plugin.version}</version>
+                <extensions>true</extensions>
                 <executions>
                     <execution>
+                        <id>build-native</id>
                         <goals>
-                            <goal>native-image</goal>
+                            <goal>compile-no-fork</goal>
                         </goals>
                         <phase>package</phase>
-                        <configuration>
-                            <mainClass>it.baccan.sockredirector.SockRedirector</mainClass>
-                            <buildArgs>--no-fallback --allow-incomplete-classpath</buildArgs>
-                            <imageName>Sockredirector</imageName>
-                            <skip>${skipNativeVersion}</skip>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>it.baccan.sockredirector.SockRedirector</mainClass>
+                    <imageName>Sockredirector</imageName>
+                    <buildArgs>
+                        <buildArg>--no-fallback</buildArg>
+                    </buildArgs>
+                    <skip>${skipNativeVersion}</skip>
+                </configuration>
             </plugin>
 
             <plugin>

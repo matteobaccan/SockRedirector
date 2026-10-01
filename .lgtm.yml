@@ -1,5 +1,0 @@
-extraction:
-  java:
-    index:
-      build_command: mvn -Dfile.encoding=UTF-8 clean install
-
