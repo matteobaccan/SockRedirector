@@ -103,4 +103,4 @@ While running, SockRedirector accepts these commands on standard input:
 
 ## QUESTIONS AND DOCUMENTATION
 
-For interact with the **SockRedirector Documentation**, visit [Deep Wiki](https://deepwiki.com/matteobaccan/SockRedirector).
+For the full **SockRedirector documentation**, visit [Deep Wiki](https://deepwiki.com/matteobaccan/SockRedirector).
