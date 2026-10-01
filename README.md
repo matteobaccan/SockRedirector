@@ -44,7 +44,7 @@ mvn package -DskipNativeVersion=false
 Put a `sockRedirector.ini` file in the working directory and start the program:
 
 ```bash
-java -jar SockRedirector-2.0.5-jar-with-dependencies.jar
+java -jar SockRedirector-<version>-jar-with-dependencies.jar
 ```
 
 Logs are written to the console and to `logs/sockRedirector.log`.
