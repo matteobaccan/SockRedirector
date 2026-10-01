@@ -142,3 +142,13 @@ jobs:
 #          asset_name: SockRedirector
 #          body: |
 #            Rilascio MacOS del ${{ steps.read_release_mac.outputs.RELEASE_BODY }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: SockRedirector-${{ matrix.os }}
+          path: |
+            target/SockRedirector.zip
+            target/SockRedirector-*.exe
+            target/SockRedirector-*-jar-with-dependencies.jar
+          if-no-files-found: ignore
